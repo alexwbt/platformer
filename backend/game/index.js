@@ -5,7 +5,7 @@ try {
 class Game {
 
     init() {
-        this.scale = 3;
+        this.scale = 10;
         this.camera = { x: 0, y: 0 };
 
         this.objects = [];
@@ -24,8 +24,9 @@ class Game {
         });
     }
 
-    spawnObject() {
-
+    spawnObject(object) {
+        object.game = this;
+        this.objects.push(object);
     }
 
     spawnParticle() {
@@ -45,8 +46,8 @@ class Game {
 
     }
 
-    update() {
-
+    update(deltaTime) {
+        this.objects.forEach(o => o.update(deltaTime));
     }
 
     render() {
@@ -58,20 +59,21 @@ class Game {
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.blocks.forEach(b => b.render());
+        this.objects.forEach(o => o.render());
     }
 
-    onScreen({ x, y, width, height }) {
+    onScreen({ x, y, width, height, shape }) {
         return {
             x: (x - this.camera.x) * this.scale + this.canvas.width / 2,
             y: (y - this.camera.y) * this.scale + this.canvas.height / 2,
             width: width * this.scale,
             height: height * this.scale,
-            onScreen: collision({ shape: SHAPE_RECT, x, y, width, height },
+            onScreen: collision({ shape, x, y, width, height },
                 { shape: SHAPE_RECT, x: 0, y: 0, width: game.canvas.width, height: game.canvas.height })
         };
     }
 
 }
 
-try { module.exports = new Game(); }
+try { module.exports = Game }
 catch (e) { }

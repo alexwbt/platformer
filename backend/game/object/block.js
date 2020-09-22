@@ -1,6 +1,6 @@
 try {
     GameObject = require(".");
-} catch (err) {}
+} catch (err) { }
 
 class Block extends GameObject {
 
@@ -23,7 +23,10 @@ class Block extends GameObject {
     }
 
     render() {
-        this.renderSprite(this.game.sprites[0], 0, 33, 7, 7);
+        const { x, y, width, height, onScreen } = this.game.onScreen(this);
+        if (!onScreen) return;
+
+        this.renderSprite(this.game.sprites[0], 0, 0, 16, 16, x, y, width, height);
     }
 
 }

@@ -8,13 +8,9 @@ const client = require('./client');
 io.on('connection', client.connection);
 
 app.use(require('cors')());
-
 app.use(express.static('game'));
 
-const game = require('./game');
-game.init();
-const Block = require('./game/object/block');
-game.spawnBlock(new Block());
+require('./game.js');
 
 http.listen(PORT, () => {
     console.log(`Server started on port ${PORT}.`);

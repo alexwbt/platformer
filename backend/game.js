@@ -1,6 +1,8 @@
+const Game = require('./game/index.js');
+const Block = require('./game/object/block');
+const Player = require('./game/object/player');
 
 const game = new Game();
-window.game = game;
 
 game.init();
 game.spawnObject(new Player());
