@@ -1,13 +1,15 @@
 try {
     collision = require("../collision").collision;
     SHAPE_RECT = require("../collision").SHAPE_RECT;
+    CLASS_OBJECT = require('../index').CLASS_OBJECT;
 } catch (err) { }
 
 class GameObject {
-    class = 'particle';
 
-    constructor(initInfo) {
+    constructor(game, initInfo) {
+        this.game = game;
         this.setInfo({
+            classType: CLASS_OBJECT,
             objectId: 0,
             shape: SHAPE_RECT,
             x: 0,
@@ -23,6 +25,7 @@ class GameObject {
     }
 
     setInfo(info) {
+        this.classType = info.classType;
         this.objectId = info.objectId;
         this.shape = info.shape;
         this.x = info.x;
@@ -36,6 +39,7 @@ class GameObject {
 
     setData(data) {
         let i = 0;
+        this.classType = data[i++];
         this.objectId = data[i++];
         this.shape = data[i++];
         this.x = data[i++];
@@ -50,8 +54,8 @@ class GameObject {
 
     getData() {
         return [
+            this.classType,
             this.objectId,
-            this.class,
             this.shape,
             this.x,
             this.y,

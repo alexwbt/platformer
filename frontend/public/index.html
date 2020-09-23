@@ -12,6 +12,12 @@
   <noscript>You need to enable JavaScript to run this app.</noscript>
   <div id="root"></div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.3.0/socket.io.js"></script>
+
+  <script>
+    const SERVER = '%REACT_APP_GAME_SERVER%';
+  </script>
+
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/collision.js"></script>
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/particle/index.js"></script>
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/particle/sparks.js"></script>
@@ -21,7 +27,7 @@
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/object/block.js"></script>
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/object/player.js"></script>
   <script type="text/javascript" src="%REACT_APP_GAME_SERVER%/index.js"></script>
-  <script type="text/javascript" src="index.js"></script>
+  <script type="text/javascript" src="%PUBLIC_URL%/index.js"></script>
 </body>
 
 </html>

@@ -4,10 +4,9 @@ try {
 } catch (err) { }
 
 class Player extends GameObject {
-    class = 'player';
 
-    constructor(initInfo) {
-        super({
+    constructor(game, initInfo) {
+        super(game, {
             character: 0,
             width: 7,
             height: 10,
@@ -36,8 +35,7 @@ class Player extends GameObject {
         // weapon
         this.aimDir = info.aimDir;
         this.weaponType = info.weaponType;
-        this.weapon = new Weapon();
-        this.weapon.owner = this;
+        this.weapon = new Weapon(this);
     }
 
     setData(data) {
@@ -52,8 +50,7 @@ class Player extends GameObject {
         // weapon
         this.aimDir = data[i++];
         this.weaponType = data[i++];
-        this.weapon = new Weapon();
-        this.weapon.owner = this;
+        this.weapon = new Weapon(this);
         return i;
     }
 
@@ -100,7 +97,7 @@ class Player extends GameObject {
             this.movedTime += deltaTime;
         else this.movedTime = 0;
 
-        this.weapon.update();
+        this.weapon.update(deltaTime);
     }
 
     render() {

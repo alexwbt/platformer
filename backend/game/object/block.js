@@ -3,10 +3,9 @@ try {
 } catch (err) { }
 
 class Block extends GameObject {
-    class = 'block';
 
-    constructor(initInfo) {
-        super({
+    constructor(game, initInfo) {
+        super(game, {
             blockType: 0,
             width: 10,
             height: 10,

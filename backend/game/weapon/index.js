@@ -1,6 +1,7 @@
 try {
-    Bullet = require('../object/bullet');
     Sparks = require('../particle/sparks');
+    CLASS_OBJECT = require('../index').CLASS_OBJECT;
+    CLASS_SPARKS = require('../index').CLASS_SPARKS;
 } catch (err) { }
 
 const weaponInfo = [
@@ -17,15 +18,18 @@ const weaponInfo = [
 ];
 
 class Weapon {
-    class = 'weapon';
 
-    constructor(initInfo) {
+    constructor(owner, initInfo) {
+        this.owner = owner;
         this.setInfo({
             x: 0,
             y: 0,
             width: 33 / 2,
             height: 17 / 2,
             magOffset: 0,
+            firing: false,
+            fireGap: 0.5,
+            firingTimer: 0,
             ...initInfo
         });
     }
@@ -36,6 +40,9 @@ class Weapon {
         this.width = info.width;
         this.height = info.height;
         this.magOffset = info.magOffset;
+        this.firing = info.firing;
+        this.fireGap = info.fireGap;
+        this.firingTimer = info.firingTimer;
     }
 
     setData(data) {
@@ -45,6 +52,9 @@ class Weapon {
         this.width = data[i++];
         this.height = data[i++];
         this.magOffset = data[i++];
+        this.firing = data[i++];
+        this.fireGap = data[i++];
+        this.firingTimer = data[i++];
         return i;
     }
 
@@ -55,6 +65,9 @@ class Weapon {
             this.width,
             this.height,
             this.magOffset,
+            this.firing,
+            this.fireGap,
+            this.firingTimer,
         ];
     }
 
@@ -67,17 +80,25 @@ class Weapon {
         const y = this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag;
         const randDir = Math.PI / 20;
         const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
-        this.owner.game.spawnObject(new Bullet({ x, y, dir: bulletDir, speed: 8 }));
-        this.owner.game.spawnParticle(new Sparks({ x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, red: true }));
+        this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, speed: 8 });
+        this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, red: true });
 
         this.magOffset = 0.3;
     }
 
-    update() {
+    update(deltaTime) {
         this.x = Math.cos(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
         this.y = Math.sin(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
         if (this.magOffset > 0) this.magOffset -= 0.1;
         else if (this.magOffset < 0) this.magOffset = 0;
+
+        if (this.firing) {
+            this.firingTimer -= deltaTime;
+            if (this.firingTimer <= 0) {
+                this.fire();
+                this.firingTimer = this.fireGap;
+            }
+        } else this.firingTimer = 0;
     }
 
     render() {

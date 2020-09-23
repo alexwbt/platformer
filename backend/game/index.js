@@ -1,12 +1,34 @@
 try {
+    GameObject = require('./object');
+    Block = require('./object/block');
+    Player = require('./object/player');
+    Bullet = require('./object/bullet');
+
+    Particle = require('./particle');
+    Sparks = require('./particle/sparks');
+
     collision = require('./collision');
 } catch (err) { }
 
+const CLASS_OBJECT = 1;
+const CLASS_BLOCK = 2;
+const CLASS_PLAYER = 3;
+const CLASS_BULLET = 4;
+
+const CLASS_PARTICLE = 5;
+const CLASS_SPARKS = 6;
+
 class Game {
+
+    constructor() {
+        this.init();
+    }
 
     init() {
         this.scale = 5;
         this.camera = { x: 0, y: 0 };
+
+        this.nextObjectId = 1;
 
         this.objects = [];
         this.particles = [];
@@ -24,33 +46,57 @@ class Game {
         });
     }
 
-    spawnObject(object) {
-        object.game = this;
-        this.objects.push(object);
+    spawnObject(classType, info = {}) {
+        const object = (() => {
+            info.objectId = this.nextObjectId++;
+            info.classType = classType;
+            switch (classType) {
+                case CLASS_BLOCK: return new Block(this, info);
+                case CLASS_PLAYER: return new Player(this, info);
+                case CLASS_BULLET: return new Bullet(this, info);
+                default: return new GameObject(this, info);
+            }
+        })();
+        (classType === CLASS_BLOCK ? this.blocks : this.objects).push(object);
+        return object;
     }
 
-    spawnParticle(particle) {
-        particle.game = this;
+    spawnParticle(classType, info = {}) {
+        const particle = (() => {
+            info.classType = classType;
+            switch (classType) {
+                case CLASS_SPARKS: return new Sparks(this, info);
+                default: return new Particle(this, info);
+            }
+        })();
         this.particles.push(particle);
-    }
-
-    spawnBlock(block) {
-        block.game = this;
-        this.blocks.push(block);
+        return particle;
     }
 
     getData() {
         return {
             particles: this.particles.map(p => p.getData()),
-            objects: this.objects.map(o => o.getData())
+            objects: this.objects.map(o => o.getData()),
+            blocks: this.blocks.map(b => b.getData())
         };
     }
 
     setData(data) {
-        this.particles = data.particles.map(pData => {
-            
+        this.particles = [];
+        this.objects = [];
+        this.particles = [];
+        data.objects.forEach(data => {
+            const particle = this.spawnParticle(data[0]);
+            particle.setData(data);
         });
-        this.objects = data.objects;
+        data.objects.forEach(data => {
+            const object = this.spawnObject(data[0]);
+            object.setData(data);
+        });
+        data.blocks.forEach(data => {
+            const block = this.spawnObject(data[0]);
+            block.setData(data);
+        });
     }
 
     update(deltaTime) {
@@ -58,10 +104,8 @@ class Game {
             p.update(deltaTime);
             return !p.removed;
         });
-        this.objects = this.objects.filter(o => {
-            o.update(deltaTime);
-            return !o.removed;
-        });
+        this.objects.forEach(o => o.update(deltaTime));
+        this.objects = this.objects.filter(o => !o.removed);
     }
 
     render() {
@@ -112,5 +156,14 @@ class Game {
 
 }
 
-try { module.exports = Game }
-catch (e) { }
+try {
+    module.exports = Game
+
+    module.exports.CLASS_OBJECT = CLASS_OBJECT;
+    module.exports.CLASS_BLOCK = CLASS_BLOCK;
+    module.exports.CLASS_PLAYER = CLASS_PLAYER;
+    module.exports.CLASS_BULLET = CLASS_BULLET;
+
+    module.exports.CLASS_PARTICLE = CLASS_PARTICLE;
+    module.exports.CLASS_SPARKS = CLASS_SPARKS;
+} catch (e) { }
