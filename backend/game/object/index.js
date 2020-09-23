@@ -17,14 +17,13 @@ class GameObject {
             height: 0,
             xVelocity: 0,
             yVelocity: 0,
+            onGround: false,
 
             // render
             alpha: 1,
 
             ...initInfo
         });
-
-        this.onGround = false;
     }
 
     setInfo(info) {
@@ -38,31 +37,33 @@ class GameObject {
         this.height = info.height;
         this.xVelocity = info.xVelocity;
         this.yVelocity = info.yVelocity;
+        this.onGround = info.onGround;
 
         // render
         this.alpha = info.alpha;
     }
 
     update() {
-        if (this.xVelocity > 0) {
+        if (Math.abs(this.xVelocity) >= 0.1) {
             this.x += this.xVelocity;
             for (const block of this.game.blocks) {
                 if (collision(block, this)) {
-                    if (this.xVelocity > 0) {
-                        this.x = block.x - this.width;
-                        this.onGround = true;
-                    } else this.x = block.x + block.width;
+                    if (this.xVelocity > 0) this.x = block.x - this.width;
+                    else this.x = block.x + block.width;
                     this.xVelocity = 0;
                     break;
                 }
             }
         }
-        if (this.yVelocity > 0) {
+        if (Math.abs(this.yVelocity) >= 0.1) {
             this.y += this.yVelocity;
+            this.onGround = false;
             for (const block of this.game.blocks) {
                 if (collision(block, this)) {
-                    if (this.yVelocity > 0) this.y = block.y - this.height;
-                    else this.y = block.y + block.height;
+                    if (this.yVelocity > 0) {
+                        this.y = block.y - this.height;
+                        this.onGround = true;
+                    } else this.y = block.y + block.height;
                     this.yVelocity = 0;
                     break;
                 }

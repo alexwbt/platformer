@@ -1,6 +1,6 @@
 try {
     collision = require('./collision');
-} catch (err) {}
+} catch (err) { }
 
 class Game {
 
@@ -63,13 +63,28 @@ class Game {
     }
 
     onScreen({ x, y, width, height, shape }) {
+        const screenX = (x - this.camera.x) * this.scale + this.canvas.width / 2;
+        const screenY = (y - this.camera.y) * this.scale + this.canvas.height / 2;
+        const screenWidth = width * this.scale;
+        const screenHeight = height * this.scale;
         return {
-            x: (x - this.camera.x) * this.scale + this.canvas.width / 2,
-            y: (y - this.camera.y) * this.scale + this.canvas.height / 2,
-            width: width * this.scale,
-            height: height * this.scale,
-            onScreen: collision({ shape, x, y, width, height },
-                { shape: SHAPE_RECT, x: 0, y: 0, width: game.canvas.width, height: game.canvas.height })
+            x: screenX,
+            y: screenY,
+            width: screenWidth,
+            height: screenHeight,
+            onScreen: collision({
+                shape,
+                x: screenX,
+                y: screenY,
+                width: screenWidth,
+                height: screenHeight,
+            }, {
+                shape: SHAPE_RECT,
+                x: 0,
+                y: 0,
+                width: game.canvas.width,
+                height: game.canvas.height
+            })
         };
     }
 
