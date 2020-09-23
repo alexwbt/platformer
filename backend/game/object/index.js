@@ -4,12 +4,11 @@ try {
 } catch (err) { }
 
 class GameObject {
+    class = 'particle';
 
     constructor(initInfo) {
         this.setInfo({
-            // game
             objectId: 0,
-            objectType: 0,
             shape: SHAPE_RECT,
             x: 0,
             y: 0,
@@ -19,17 +18,12 @@ class GameObject {
             yVelocity: 0,
             onGround: false,
 
-            // render
-            alpha: 1,
-
             ...initInfo
         });
     }
 
     setInfo(info) {
-        // game
         this.objectId = info.objectId;
-        this.objectType = info.objectType;
         this.shape = info.shape;
         this.x = info.x;
         this.y = info.y;
@@ -38,9 +32,35 @@ class GameObject {
         this.xVelocity = info.xVelocity;
         this.yVelocity = info.yVelocity;
         this.onGround = info.onGround;
+    }
 
-        // render
-        this.alpha = info.alpha;
+    setData(data) {
+        let i = 0;
+        this.objectId = data[i++];
+        this.shape = data[i++];
+        this.x = data[i++];
+        this.y = data[i++];
+        this.width = data[i++];
+        this.height = data[i++];
+        this.xVelocity = data[i++];
+        this.yVelocity = data[i++];
+        this.onGround = data[i++];
+        return i;
+    }
+
+    getData() {
+        return [
+            this.objectId,
+            this.class,
+            this.shape,
+            this.x,
+            this.y,
+            this.width,
+            this.height,
+            this.xVelocity,
+            this.yVelocity,
+            this.onGround,
+        ];
     }
 
     update() {

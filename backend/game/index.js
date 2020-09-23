@@ -5,7 +5,7 @@ try {
 class Game {
 
     init() {
-        this.scale = 10;
+        this.scale = 5;
         this.camera = { x: 0, y: 0 };
 
         this.objects = [];
@@ -29,8 +29,9 @@ class Game {
         this.objects.push(object);
     }
 
-    spawnParticle() {
-
+    spawnParticle(particle) {
+        particle.game = this;
+        this.particles.push(particle);
     }
 
     spawnBlock(block) {
@@ -39,15 +40,28 @@ class Game {
     }
 
     getData() {
-
+        return {
+            particles: this.particles.map(p => p.getData()),
+            objects: this.objects.map(o => o.getData())
+        };
     }
 
-    setData() {
-
+    setData(data) {
+        this.particles = data.particles.map(pData => {
+            
+        });
+        this.objects = data.objects;
     }
 
     update(deltaTime) {
-        this.objects.forEach(o => o.update(deltaTime));
+        this.particles = this.particles.filter(p => {
+            p.update(deltaTime);
+            return !p.removed;
+        });
+        this.objects = this.objects.filter(o => {
+            o.update(deltaTime);
+            return !o.removed;
+        });
     }
 
     render() {
@@ -60,6 +74,7 @@ class Game {
 
         this.blocks.forEach(b => b.render());
         this.objects.forEach(o => o.render());
+        this.particles.forEach(p => p.render());
     }
 
     onScreen({ x, y, width, height, shape }) {
@@ -85,6 +100,13 @@ class Game {
                 width: game.canvas.width,
                 height: game.canvas.height
             })
+        };
+    }
+
+    inGame(x, y) {
+        return {
+            x: (x - this.canvas.width / 2) / this.scale + this.camera.x,
+            y: (y - this.canvas.height / 2) / this.scale + this.camera.y
         };
     }
 

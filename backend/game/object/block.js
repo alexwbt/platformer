@@ -3,6 +3,7 @@ try {
 } catch (err) { }
 
 class Block extends GameObject {
+    class = 'block';
 
     constructor(initInfo) {
         super({
@@ -16,6 +17,18 @@ class Block extends GameObject {
     setInfo(info) {
         super.setInfo(info);
         this.blockType = info.blockType;
+    }
+
+    setData(data) {
+        let i = super.setData(data);
+        this.blockType = data[i++];
+        return i;
+    }
+
+    getData() {
+        return super.getData().concat([
+            this.blockType,
+        ]);
     }
 
     update() {

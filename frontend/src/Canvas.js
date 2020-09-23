@@ -17,7 +17,8 @@ const Canvas = () => {
     useEffect(() => {
         window.game.setCanvas(canvas.current, [
             `${REACT_APP_GAME_SERVER}/sprite1.png`,
-            `${REACT_APP_GAME_SERVER}/sprite2.png`
+            `${REACT_APP_GAME_SERVER}/sprite2.png`,
+            `${REACT_APP_GAME_SERVER}/sprite3.png`
         ]);
     }, [canvas]);
 
