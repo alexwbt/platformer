@@ -4,6 +4,7 @@ class Particle {
     constructor(game, initInfo) {
         this.game = game;
         this.setInfo({
+            classType: 0,
             x: 0,
             y: 0,
             duration: 0,
@@ -13,6 +14,7 @@ class Particle {
     }
 
     setInfo(info) {
+        this.classType = info.classType;
         this.x = info.x;
         this.y = info.y;
         this.duration = info.duration;
@@ -21,6 +23,7 @@ class Particle {
 
     setData(data) {
         let i = 0;
+        this.classType = data[i++];
         this.x = data[i++];
         this.y = data[i++];
         this.duration = data[i++];
@@ -30,6 +33,7 @@ class Particle {
 
     getData() {
         return [
+            this.classType,
             this.x,
             this.y,
             this.duration,
@@ -47,4 +51,12 @@ class Particle {
 
     }
 
+    renderSprite(sprite, sx, sy, sWidth, sHeight, x, y, width, height) {
+        this.game.ctx.drawImage(sprite, sx, sy, sWidth, sHeight, x, y, width, height);
+    }
+
 }
+
+try {
+    module.exports = Particle;
+} catch (err) { }

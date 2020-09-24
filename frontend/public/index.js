@@ -2,20 +2,32 @@
 const game = new Game();
 window.game = game;
 
-
-game.spawnObject(CLASS_BLOCK, { y: 15, width: 200 });
-
 let player = false;
-player = game.spawnObject(CLASS_PLAYER);
+let playerId = 0;
+// player = game.spawnObject(CLASS_CHARACTER);
+// game.spawnObject(CLASS_BLOCK, { y: 55, x: 100, width: 200 });
+// game.spawnObject(CLASS_BLOCK, { y: 100, width: 400 });
+// game.spawnObject(CLASS_BLOCK, { y: 0, height: 101 });
+// game.cameraFocusId = player.objectId;
 
 const socket = io(SERVER);
 
 socket.on('connect', () => {
     console.log('socket connected');
+
+    socket.emit('player-name', 'alex');
+});
+
+socket.on('player-id', id => {
+    playerId = id;
+    game.cameraFocusId = id;
 });
 
 socket.on('game-data', data => {
-    // game.setData(data);
+    game.setData(data);
+    if (!player && playerId) {
+        player = game.objects.find(o => o.objectId === playerId);
+    }
 });
 
 let startTime = Date.now();
@@ -23,10 +35,6 @@ setInterval(() => {
     const now = Date.now();
     const deltaTime = (now - startTime) / 1000;
     startTime = now;
-    if (player) {
-        game.camera.x = player.x + player.width / 2;
-        game.camera.y = player.y + player.height / 2;
-    }
     game.update(deltaTime);
     game.render();
 }, 1000 / 60);
@@ -59,19 +67,24 @@ window.addEventListener('keyup', e => {
 
 window.addEventListener('mousemove', e => {
     if (!game.canvas || !player) return;
-    const mouseInGame = game.inGame(e.x, e.y);
-    player.aimDir = Math.atan2(mouseInGame.y - (player.y + player.height / 2), mouseInGame.x - (player.x + player.width / 2));
+    player.aimDir = Math.atan2(e.y - (game.canvas.height / 2), e.x - (game.canvas.width / 2));
     socket.emit('player-aim', player.aimDir);
 });
 
 window.addEventListener('mousedown', e => {
-    if (player && e.button === 0) player.weapon.firing = true;
+    if (player && e.button === 0) {
+        player.weapon.firing = true;
+        socket.emit('player-fire', true);
+    }
 });
 
 window.addEventListener('mouseup', e => {
-    if (player && e.button === 0) player.weapon.firing = false;
+    if (player && e.button === 0) {
+        player.weapon.firing = false;
+        socket.emit('player-fire', false);
+    }
 });
 
-window.addEventListener('mousewheel', e => {
-    game.scale = Math.max(1, game.scale - e.deltaY / 100);
-});
+// window.addEventListener('mousewheel', e => {
+//     game.scale = Math.max(1, game.scale - e.deltaY / 100);
+// });

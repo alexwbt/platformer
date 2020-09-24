@@ -1,6 +1,7 @@
 try {
     GameObject = require(".");
-    SHAPE_LINE = require('../collision');
+    SHAPE_LINE = require('../collision').SHAPE_LINE;
+    collision = require('../collision').collision;
     Sparks = require("../particle/sparks");
     CLASS_SPARKS = require('../index').CLASS_SPARKS;
 } catch (err) { }
@@ -55,7 +56,12 @@ class Bullet extends GameObject {
         ]);
     }
 
-    update() {
+    update(deltaTime) {
+        this.traveledTime += deltaTime;
+        if (this.traveledTime >= this.travelTime) {
+            this.removed = true;
+            return;
+        }
         this.x1 = this.x;
         this.y1 = this.y;
         this.x += this.xVelocity;

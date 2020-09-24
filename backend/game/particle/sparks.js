@@ -13,6 +13,14 @@ class Sparks extends Particle {
             red: false,
             ...initInfo
         });
+    }
+
+    setInfo(info) {
+        super.setInfo(info);
+        this.dir = info.dir;
+        this.randomRange = info.randomRange;
+        this.radius = info.radius;
+        this.red = info.red;
 
         this.sparks = [];
         for (let i = 0; i < 10; i++) {
@@ -22,20 +30,19 @@ class Sparks extends Particle {
         }
     }
 
-    setInfo(info) {
-        super.setInfo(info);
-        this.dir = info.dir;
-        this.randomRange = info.randomRange;
-        this.radius = info.radius;
-        this.red = info.red;
-    }
-
     setData(data) {
         let i = super.setData(data);
         this.dir = data[i++];
         this.randomRange = data[i++];
         this.radius = data[i++];
         this.red = data[i++];
+
+        this.sparks = [];
+        for (let i = 0; i < 10; i++) {
+            const dir = this.dir + Math.random() * this.randomRange - this.randomRange / 2;
+            const radius = Math.random() * this.radius;
+            this.sparks.push({ dir, radius });
+        }
         return i;
     }
 

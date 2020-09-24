@@ -18,6 +18,8 @@ class GameObject {
             height: 0,
             xVelocity: 0,
             yVelocity: 0,
+            xMovement: 0,
+            yMovement: 0,
             onGround: false,
 
             ...initInfo
@@ -34,6 +36,8 @@ class GameObject {
         this.height = info.height;
         this.xVelocity = info.xVelocity;
         this.yVelocity = info.yVelocity;
+        this.xMovement = info.xMovement;
+        this.yMovement = info.yMovement;
         this.onGround = info.onGround;
     }
 
@@ -48,6 +52,8 @@ class GameObject {
         this.height = data[i++];
         this.xVelocity = data[i++];
         this.yVelocity = data[i++];
+        this.xMovement = data[i++];
+        this.yMovement = data[i++];
         this.onGround = data[i++];
         return i;
     }
@@ -63,34 +69,63 @@ class GameObject {
             this.height,
             this.xVelocity,
             this.yVelocity,
+            this.xMovement,
+            this.yMovement,
             this.onGround,
         ];
     }
 
+    getCenter() {
+        return {
+            x: this.x + this.width / 2,
+            y: this.y + this.height / 2
+        };
+    }
+
     update() {
-        if (Math.abs(this.xVelocity) >= 0.1) {
-            this.x += this.xVelocity;
+        const xVelocity = this.xVelocity + this.xMovement;
+        if (Math.abs(xVelocity) >= 0.1) {
+            this.x += xVelocity;
             for (const block of this.game.blocks) {
                 if (collision(block, this)) {
-                    if (this.xVelocity > 0) this.x = block.x - this.width;
+                    if (xVelocity > 0) this.x = block.x - this.width;
                     else this.x = block.x + block.width;
                     this.xVelocity = 0;
+                    this.xMovement = 0;
+                    this.yVelocity *= 0.8;
+                    this.yMovement *= 0.8;
                     break;
                 }
             }
         }
-        if (Math.abs(this.yVelocity) >= 0.1) {
-            this.y += this.yVelocity;
+        const yVelocity = this.yVelocity + this.yMovement;
+        if (Math.abs(yVelocity) >= 0.1) {
+            this.y += yVelocity;
             this.onGround = false;
             for (const block of this.game.blocks) {
                 if (collision(block, this)) {
-                    if (this.yVelocity > 0) {
+                    if (yVelocity > 0) {
                         this.y = block.y - this.height;
                         this.onGround = true;
                     } else this.y = block.y + block.height;
                     this.yVelocity = 0;
+                    this.yMovement = 0;
+                    this.xVelocity *= 0.8;
+                    this.xMovement *= 0.8;
                     break;
                 }
+            }
+        }
+        if (Math.abs(this.y) > 1500) this.removed = true;
+
+        for (const obj of this.game.objects) {
+            if (obj.shape === SHAPE_RECT && collision(obj, this)) {
+                const center = this.getCenter();
+                const objCenter = obj.getCenter();
+                const diffX = center.x - objCenter.x;
+                const diffY = center.y - objCenter.y;
+                if (diffX !== 0) this.xVelocity += 0.1 * diffX / Math.abs(diffX);
+                if (diffY !== 0) this.yVelocity += 0.1 * diffY / Math.abs(diffY);
             }
         }
     }
@@ -100,7 +135,6 @@ class GameObject {
     }
 
     renderSprite(sprite, sx, sy, sWidth, sHeight, x, y, width, height) {
-        this.game.ctx.imageSmoothingEnabled = false;
         this.game.ctx.drawImage(sprite, sx, sy, sWidth, sHeight, x, y, width, height);
     }
 

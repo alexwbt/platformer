@@ -1,7 +1,6 @@
 try {
-    Sparks = require('../particle/sparks');
-    CLASS_OBJECT = require('../index').CLASS_OBJECT;
-    CLASS_SPARKS = require('../index').CLASS_SPARKS;
+    CLASS_BULLET = require('../classes.js').CLASS_BULLET;
+    CLASS_SPARKS = require('../classes.js').CLASS_SPARKS;
 } catch (err) { }
 
 const weaponInfo = [
