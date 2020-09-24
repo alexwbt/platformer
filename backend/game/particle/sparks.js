@@ -3,10 +3,9 @@ try {
 } catch (err) { }
 
 class Sparks extends Particle {
-    class = 'sparks';
 
-    constructor(initInfo) {
-        super({
+    constructor(game, initInfo) {
+        super(game, {
             duration: 0.1,
             dir: 0,
             randomRange: Math.PI * 2,

@@ -1,8 +1,8 @@
 
 class Particle {
-    class = 'particle';
 
-    constructor(initInfo) {
+    constructor(game, initInfo) {
+        this.game = game;
         this.setInfo({
             x: 0,
             y: 0,

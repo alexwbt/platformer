@@ -2,13 +2,13 @@ try {
     GameObject = require(".");
     SHAPE_LINE = require('../collision');
     Sparks = require("../particle/sparks");
+    CLASS_SPARKS = require('../index').CLASS_SPARKS;
 } catch (err) { }
 
 class Bullet extends GameObject {
-    class = 'bullet';
 
-    constructor(initInfo) {
-        super({
+    constructor(game, initInfo) {
+        super(game, {
             width: 1,
             height: 1,
 
@@ -65,11 +65,8 @@ class Bullet extends GameObject {
         for (const block of this.game.blocks) {
             const coll = collision(block, this)
             if (coll) {
-                for (const pt of coll) {
-                    if (pt) {
-                        this.game.spawnParticle(new Sparks({ x: pt.x, y: pt.y }));
-                    }
-                }
+                for (const pt of coll)
+                    if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y });
                 this.removed = true;
                 break;;
             }
