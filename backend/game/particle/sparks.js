@@ -2,6 +2,12 @@ try {
     Particle = require(".");
 } catch (err) { }
 
+const sparksColorFunctions = [
+    () => `rgba(255, ${Math.random() * 55 + 200}, 0, ${Math.random() * 0.7})`,
+    () => `rgba(255, ${Math.random() * 255}, 0, ${Math.random() * 0.7})`,
+    () => `rgba(150, 0, 0, 1)`,
+];
+
 class Sparks extends Particle {
 
     constructor(game, initInfo) {
@@ -10,7 +16,8 @@ class Sparks extends Particle {
             dir: 0,
             randomRange: Math.PI * 2,
             radius: 5,
-            red: false,
+            colorFunction: 0,
+            amount: 10,
             ...initInfo
         });
     }
@@ -20,10 +27,11 @@ class Sparks extends Particle {
         this.dir = info.dir;
         this.randomRange = info.randomRange;
         this.radius = info.radius;
-        this.red = info.red;
+        this.colorFunction = info.colorFunction;
+        this.amount = info.amount;
 
         this.sparks = [];
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.amount; i++) {
             const dir = this.dir + Math.random() * this.randomRange - this.randomRange / 2;
             const radius = Math.random() * this.radius;
             this.sparks.push({ dir, radius });
@@ -35,10 +43,11 @@ class Sparks extends Particle {
         this.dir = data[i++];
         this.randomRange = data[i++];
         this.radius = data[i++];
-        this.red = data[i++];
+        this.colorFunction = data[i++];
+        this.amount = data[i++];
 
         this.sparks = [];
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < this.amount; i++) {
             const dir = this.dir + Math.random() * this.randomRange - this.randomRange / 2;
             const radius = Math.random() * this.radius;
             this.sparks.push({ dir, radius });
@@ -51,13 +60,14 @@ class Sparks extends Particle {
             this.dir,
             this.randomRange,
             this.radius,
-            this.red,
+            this.colorFunction,
+            this.amount,
         ]);
     }
 
     render() {
         const { x, y } = this.game.onScreen(this);
-        this.game.ctx.fillStyle = `rgba(255, ${this.red ? Math.random() * 255 : Math.random() * 55 + 200}, 0, ${Math.random() * 0.7})`;
+        this.game.ctx.fillStyle = sparksColorFunctions[this.colorFunction]();
         for (const spark of this.sparks) {
             const size = Math.random() * this.game.scale;
             this.game.ctx.beginPath();

@@ -3,7 +3,8 @@ try {
     SHAPE_LINE = require('../collision').SHAPE_LINE;
     collision = require('../collision').collision;
     Sparks = require("../particle/sparks");
-    CLASS_SPARKS = require('../index').CLASS_SPARKS;
+    CLASS_SPARKS = require('../classes').CLASS_SPARKS;
+    CLASS_CHARACTER = require("../classes").CLASS_SPARKS;
 } catch (err) { }
 
 class Bullet extends GameObject {
@@ -17,6 +18,7 @@ class Bullet extends GameObject {
             speed: 10,
             travelTime: 0.5,
             traveledTime: 0,
+            damage: 0.4,
 
             shape: SHAPE_LINE,
 
@@ -30,6 +32,7 @@ class Bullet extends GameObject {
         this.speed = info.speed;
         this.travelTime = info.travelTime;
         this.traveledTime = info.traveledTime;
+        this.damage = info.damage;
 
         this.xVelocity = Math.cos(this.dir) * this.speed;
         this.yVelocity = Math.sin(this.dir) * this.speed;
@@ -41,6 +44,7 @@ class Bullet extends GameObject {
         this.speed = data[i++];
         this.travelTime = data[i++];
         this.traveledTime = data[i++];
+        this.damage = data[i++];
 
         this.xVelocity = Math.cos(this.dir) * this.speed;
         this.yVelocity = Math.sin(this.dir) * this.speed;
@@ -53,6 +57,7 @@ class Bullet extends GameObject {
             this.speed,
             this.travelTime,
             this.traveledTime,
+            this.damage,
         ]);
     }
 
@@ -77,16 +82,25 @@ class Bullet extends GameObject {
                 break;;
             }
         }
+
+        for (const obj of this.game.objects) {
+            if (obj.classType === CLASS_CHARACTER && collision(obj, this)) {
+                obj.hit(this);
+                this.removed = true;
+                break;
+            }
+        }
     }
 
     render() {
         const one = this.game.onScreen({ x: this.x1, y: this.y1 });
         const two = this.game.onScreen({ x: this.x2, y: this.y2 });
+        const size = 0.8 * this.game.scale;
         this.game.ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
-        this.game.ctx.lineWidth = 0.8 * this.game.scale;
+        this.game.ctx.lineWidth = size;
         this.game.ctx.beginPath();
         this.game.ctx.moveTo(one.x, one.y);
-        this.game.ctx.lineTo(two.x, two.y);
+        this.game.ctx.lineTo(one.x + (two.x - one.x) * 0.99, one.y + (two.y - one.y) * 0.99);
         this.game.ctx.stroke();
     }
 

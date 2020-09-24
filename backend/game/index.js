@@ -127,7 +127,7 @@ class Game {
         if (!this.ctx || !this.canvas)
             return;
 
-        this.scale = Math.max(this.canvas.width, this.canvas.height) / 300;
+        // this.scale = Math.max(this.canvas.width, this.canvas.height) / 300;
 
         const { x, y, height } = this.onScreen({ x: 0, y: -100, height: 500 });
         const skyGradient = this.ctx.createLinearGradient(x, y, x, height);
@@ -159,7 +159,7 @@ class Game {
             y: screenY,
             width: screenWidth,
             height: screenHeight,
-            onScreen: collision({
+            onScreen: !width || !height ? true : collision({
                 shape,
                 x: screenX,
                 y: screenY,

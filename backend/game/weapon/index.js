@@ -80,7 +80,7 @@ class Weapon {
         const randDir = Math.PI / 20;
         const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
         this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, speed: 8 });
-        this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, red: true });
+        this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, colorFunction: 1 });
 
         this.magOffset = 0.3;
     }
@@ -114,7 +114,9 @@ class Weapon {
         const spriteY = Math.floor(this.owner.weaponType / 4) * spriteHeight + 0.5;
         this.owner.game.ctx.save();
         this.owner.game.ctx.translate(x, y);
-        this.owner.game.ctx.rotate(this.owner.aimDir);
+        // this.owner.game.ctx.rotate(this.owner.aimDir);
+        // ............................................// tilt up with ease out cubic function
+        this.owner.game.ctx.rotate(this.owner.aimDir + (flip ? 0.2 : -0.2) * (1 - Math.pow(1 - (this.firingTimer / this.fireGap), 3)));
         if (flip)
             this.owner.game.ctx.scale(1, -1);
         this.owner.game.ctx.drawImage(this.owner.game.sprites[2],

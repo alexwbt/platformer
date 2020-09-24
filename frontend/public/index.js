@@ -85,6 +85,6 @@ window.addEventListener('mouseup', e => {
     }
 });
 
-// window.addEventListener('mousewheel', e => {
-//     game.scale = Math.max(1, game.scale - e.deltaY / 100);
-// });
+window.addEventListener('mousewheel', e => {
+    game.scale = Math.max(1, game.scale - e.deltaY / 100);
+});

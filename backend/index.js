@@ -37,7 +37,7 @@ io.on('connection', socket => {
         player: game.spawnObject(CLASS_CHARACTER, { y: 25 }),
         update: () => {
             if (client.player.removed) {
-                client.player = game.spawnObject(CLASS_CHARACTER, { y: 25 });
+                client.player = game.spawnObject(CLASS_CHARACTER, { y: 25, name: client.player.name });
                 socket.emit('player-id', client.player.objectId);
             }
         },

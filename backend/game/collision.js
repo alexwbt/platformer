@@ -4,6 +4,7 @@ const SHAPE_LINE = 2;
 const collision = (object1, object2) => {
     switch (`${object1.shape}:${object2.shape}`) {
         case `${SHAPE_RECT}:${SHAPE_RECT}`: return rectVsRect(object1, object2);
+        case `${SHAPE_LINE}:${SHAPE_LINE}`: return lineVsLine(object1, object2);
 
         case `${SHAPE_LINE}:${SHAPE_RECT}`: return lineVsRect(object1, object2);
         case `${SHAPE_RECT}:${SHAPE_LINE}`: return lineVsRect(object2, object1);
@@ -24,41 +25,37 @@ const rectVsRect = (rect1, rect2) =>
 
 
 /**
- * Returns true if line(x1, y1, x2, y2) collides with line(x3, y3, x4, y4).
- * @param {number} x1 
- * @param {number} y1 
- * @param {number} x2 
- * @param {number} y2 
- * @param {number} x3 
- * @param {number} y3 
- * @param {number} x4 
- * @param {number} y4 
+ * Returns true if line1 collides with line2.
+ * @param {{x1:number, y1:number, x2:number, y2: number}} line1 
+ * @param {{x1:number, y1:number, x2:number, y2: number}} line2 
  */
-const lineVsLine = (x1, y1, x2, y2, x3, y3, x4, y4) => {
+const lineVsLine = (line1, line2) => {
     // calculate the distance to intersection point
-    const uA = ((x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
-    const uB = ((x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3)) / ((y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1));
+    const uA = ((line2.x2 - line2.x1) * (line1.y1 - line2.y1) - (line2.y2 - line2.y1) * (line1.x1 - line2.x1))
+        / ((line2.y2 - line2.y1) * (line1.x2 - line1.x1) - (line2.x2 - line2.x1) * (line1.y2 - line1.y1));
+    const uB = ((line1.x2 - line1.x1) * (line1.y1 - line2.y1) - (line1.y2 - line1.y1) * (line1.x1 - line2.x1))
+        / ((line2.y2 - line2.y1) * (line1.x2 - line1.x1) - (line2.x2 - line2.x1) * (line1.y2 - line1.y1));
 
     // if uA and uB are between 0-1, lines are colliding
     if (uA >= 0 && uA <= 1 && uB >= 0 && uB <= 1)
         return {
-            x: x1 + (uA * (x2 - x1)),
-            y: y1 + (uA * (y2 - y1))
+            x: line1.x1 + (uA * (line1.x2 - line1.x1)),
+            y: line1.y1 + (uA * (line1.y2 - line1.y1))
         };
     return false;
 };
 
 /**
  * Returns true if line collides with rect.
- * @param {x1:{number}, y1:{number}, x2:{number}, y2: {number}} line 
+ * @param {{x1:number, y1:number, x2:number, y2: number}} line 
  * @param {{x: number, y: number, width: number, height: number}} rect 
  */
 const lineVsRect = (line, rect) => {
     // check if the line has hit any of the rectangle's sides
-    const left = lineVsLine(line.x1, line.y1, line.x2, line.y2, rect.x, rect.y, rect.x, rect.y + rect.height);
-    const right = lineVsLine(line.x1, line.y1, line.x2, line.y2, rect.x + rect.width, rect.y, rect.x + rect.width, rect.y + rect.height);
-    const top = lineVsLine(line.x1, line.y1, line.x2, line.y2, rect.x, rect.y, rect.x + rect.width, rect.y);
-    const bottom = lineVsLine(line.x1, line.y1, line.x2, line.y2, rect.x, rect.y + rect.height, rect.x + rect.width, rect.y + rect.height);
+    const left = lineVsLine(line, { x1: rect.x, y1: rect.y, x2: rect.x, y2: rect.y + rect.height });
+    const right = lineVsLine(line, { x1: rect.x + rect.width, y1: rect.y, x2: rect.x + rect.width, y2: rect.y + rect.height });
+    const top = lineVsLine(line, { x1: rect.x, y1: rect.y, x2: rect.x + rect.width, y2: rect.y });
+    const bottom = lineVsLine(line, { x1: rect.x, y1: rect.y + rect.height, x2: rect.x + rect.width, y2: rect.y + rect.height });
     if (!left && !right && !top && !bottom) return false;
     return [left, right, top, bottom];
 };
