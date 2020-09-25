@@ -26,7 +26,7 @@ class Character extends GameObject {
 
             // weapon
             aimDir: 0,
-            weaponType: 1,
+            weaponType: Math.floor(Math.random() * 6),
             ...initInfo
         });
     }

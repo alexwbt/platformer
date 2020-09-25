@@ -62,7 +62,7 @@ class Game {
             }
         })();
         if (classType === CLASS_CHARACTER) {
-            
+
         } else if (classType === CLASS_BLOCK) {
             if (getId) for (const block of this.blocks)
                 if (block.x === object.x && block.y === object.y)
@@ -151,7 +151,12 @@ class Game {
 
         this.ctx.imageSmoothingEnabled = false;
         this.blocks.forEach(b => b.render());
-        this.objects.forEach(o => o.render());
+        this.objects.forEach(o => {
+            o.render();
+            if (this.cameraFocusId && o.objectId === this.cameraFocusId && o.weapon) {
+                o.weapon.renderInfo();
+            }
+        });
         this.particles.forEach(p => p.render());
     }
 

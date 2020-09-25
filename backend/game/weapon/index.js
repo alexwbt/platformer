@@ -4,39 +4,7 @@ try {
 } catch (err) { }
 
 const weaponInfo = [
-    {},
-    {
-        gripX: 13,
-        gripY: 9,
-        fireX: 28,
-        fireY: 7,
-        auto: true,
-        fireGap: 0.1,
-        scale: 0.5,
-        damage: 0.3,
-        accuracy: 0.2,
-        speed: 8,
-        travelTime: 0.2,
-        magSize: 21,
-        reloadTime: 1,
-    },
-    {
-        gripX: 13,
-        gripY: 9,
-        fireX: 35,
-        fireY: 7,
-        auto: true,
-        fireGap: 0.15,
-        scale: 0.5,
-        damage: 0.4,
-        accuracy: 0.15,
-        speed: 9,
-        travelTime: 0.2,
-        magSize: 100,
-        reloadTime: 6,
-    },
-    {},
-    {
+    { // pistol
         gripX: 13,
         gripY: 9,
         fireX: 19,
@@ -47,10 +15,91 @@ const weaponInfo = [
         damage: 0.3,
         accuracy: 0.2,
         speed: 6,
-        travelTime: 0.2,
+        travelTime: 0.25,
         magSize: 12,
         reloadTime: 1,
-    }
+        projectile: 1,
+    },
+    { // submachine gun
+        gripX: 13,
+        gripY: 9,
+        fireX: 28,
+        fireY: 7,
+        auto: true,
+        fireGap: 0.1,
+        scale: 0.5,
+        damage: 0.3,
+        accuracy: 0.2,
+        speed: 8,
+        travelTime: 0.25,
+        magSize: 21,
+        reloadTime: 1,
+        projectile: 1,
+    },
+    { // machine gun
+        gripX: 13,
+        gripY: 9,
+        fireX: 35,
+        fireY: 7,
+        auto: true,
+        fireGap: 0.15,
+        scale: 0.5,
+        damage: 0.4,
+        accuracy: 0.15,
+        speed: 9,
+        travelTime: 0.27,
+        magSize: 100,
+        reloadTime: 6,
+        projectile: 1,
+    },
+    { // double barrow shotgun
+        gripX: 13,
+        gripY: 9,
+        fireX: 35,
+        fireY: 7,
+        auto: false,
+        fireGap: 0.01,
+        scale: 0.5,
+        damage: 0.3,
+        accuracy: 0.05,
+        speed: 8,
+        travelTime: 0.25,
+        magSize: 2,
+        reloadTime: 1,
+        projectile: 5,
+    },
+    { // DMR
+        gripX: 13,
+        gripY: 9,
+        fireX: 35,
+        fireY: 7,
+        auto: false,
+        fireGap: 0.25,
+        scale: 0.5,
+        damage: 0.5,
+        accuracy: 0.5,
+        speed: 10,
+        travelTime: 0.3,
+        magSize: 20,
+        reloadTime: 2,
+        projectile: 1,
+    },
+    { // sniper rifle
+        gripX: 13,
+        gripY: 9,
+        fireX: 35,
+        fireY: 7,
+        auto: false,
+        fireGap: 0.5,
+        scale: 0.5,
+        damage: 0.9,
+        accuracy: 1,
+        speed: 13,
+        travelTime: 0.3,
+        magSize: 6,
+        reloadTime: 3,
+        projectile: 1,
+    },
 ];
 
 class Weapon {
@@ -117,10 +166,12 @@ class Weapon {
 
         const x = this.x + this.owner.x + this.owner.width / 2 - Math.cos(dir) * mag;
         const y = this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag;
-        const randDir = Math.PI / (100 * info.accuracy);
-        const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
-        this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, ...info });
-        this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, colorFunction: 1 });
+        for (let i = 0; i < info.projectile; i++) {
+            const randDir = Math.PI / (100 * info.accuracy);
+            const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
+            this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, ...info });
+            this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, colorFunction: 1 });
+        }
 
         this.magOffset = 0.3;
     }
@@ -143,7 +194,7 @@ class Weapon {
                 this.fire();
                 this.firingTimer = info.fireGap;
             }
-        } else if (info.auto && this.firingTimer > 0)
+        } else if (this.firingTimer > 0)
             this.firingTimer -= deltaTime;
         else this.firingTimer = 0;
 
@@ -198,8 +249,6 @@ class Weapon {
         // });
         // this.owner.game.ctx.fillStyle = 'yellow';
         // this.owner.game.ctx.fillRect(firePoint.x, firePoint.y, 2, 2);
-
-        this.renderInfo();
     }
 
     renderInfo() {
