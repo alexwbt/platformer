@@ -47,6 +47,7 @@ window.addEventListener('keydown', e => {
             case 's': player.controls[2] = true; break;
             case 'd': player.controls[3] = true; break;
             case ' ': player.controls[4] = true; break;
+            case 'r': socket.emit('player-reload'); break;
         }
         socket.emit('player-control', player.controls);
     }

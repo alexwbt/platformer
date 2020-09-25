@@ -16,7 +16,7 @@ class Bullet extends GameObject {
 
             dir: 0,
             speed: 10,
-            travelTime: 0.5,
+            travelTime: 0.2,
             traveledTime: 0,
             damage: 0.4,
 
@@ -84,10 +84,13 @@ class Bullet extends GameObject {
         }
 
         for (const obj of this.game.objects) {
-            if (obj.classType === CLASS_CHARACTER && collision(obj, this)) {
-                obj.hit(this);
-                this.removed = true;
-                break;
+            if (obj.classType === CLASS_CHARACTER) {
+                const coll = collision(obj, this);
+                if (coll) {
+                    obj.hit(this, coll);
+                    this.removed = true;
+                    break;
+                }
             }
         }
     }

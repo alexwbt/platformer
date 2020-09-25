@@ -5,14 +5,51 @@ try {
 
 const weaponInfo = [
     {},
-    {},
-    {},
+    {
+        gripX: 13,
+        gripY: 9,
+        fireX: 28,
+        fireY: 7,
+        auto: true,
+        fireGap: 0.1,
+        scale: 0.5,
+        damage: 0.3,
+        accuracy: 0.2,
+        speed: 8,
+        travelTime: 0.2,
+        magSize: 21,
+        reloadTime: 1,
+    },
+    {
+        gripX: 13,
+        gripY: 9,
+        fireX: 35,
+        fireY: 7,
+        auto: true,
+        fireGap: 0.15,
+        scale: 0.5,
+        damage: 0.4,
+        accuracy: 0.15,
+        speed: 9,
+        travelTime: 0.2,
+        magSize: 100,
+        reloadTime: 6,
+    },
     {},
     {
-        gripX: 13 / 2,
-        gripY: 9 / 2,
-        fireX: 20 / 2,
-        fireY: 6 / 2
+        gripX: 13,
+        gripY: 9,
+        fireX: 19,
+        fireY: 6,
+        auto: false,
+        fireGap: 0.1,
+        scale: 0.5,
+        damage: 0.3,
+        accuracy: 0.2,
+        speed: 6,
+        travelTime: 0.2,
+        magSize: 12,
+        reloadTime: 1,
     }
 ];
 
@@ -23,12 +60,12 @@ class Weapon {
         this.setInfo({
             x: 0,
             y: 0,
-            width: 33 / 2,
-            height: 17 / 2,
             magOffset: 0,
             firing: false,
-            fireGap: 0.5,
             firingTimer: 0,
+            ammo: weaponInfo[this.owner.weaponType].magSize,
+            carryingAmmo: 200,
+            reloadTimer: 0,
             ...initInfo
         });
     }
@@ -36,24 +73,24 @@ class Weapon {
     setInfo(info) {
         this.x = info.x;
         this.y = info.y;
-        this.width = info.width;
-        this.height = info.height;
         this.magOffset = info.magOffset;
         this.firing = info.firing;
-        this.fireGap = info.fireGap;
         this.firingTimer = info.firingTimer;
+        this.ammo = info.ammo;
+        this.reloadTimer = info.reloadTimer;
+        this.carryingAmmo = info.carryingAmmo;
     }
 
     setData(data) {
         let i = 0;
         this.x = data[i++];
         this.y = data[i++];
-        this.width = data[i++];
-        this.height = data[i++];
         this.magOffset = data[i++];
         this.firing = data[i++];
-        this.fireGap = data[i++];
         this.firingTimer = data[i++];
+        this.ammo = data[i++];
+        this.reloadTimer = data[i++];
+        this.carryingAmmo = data[i++];
         return i;
     }
 
@@ -61,82 +98,137 @@ class Weapon {
         return [
             this.x,
             this.y,
-            this.width,
-            this.height,
             this.magOffset,
             this.firing,
-            this.fireGap,
             this.firingTimer,
+            this.ammo,
+            this.reloadTimer,
+            this.carryingAmmo,
         ];
     }
 
     fire() {
+        if (this.ammo <= 0) return;
+        this.ammo--;
+        const info = weaponInfo[this.owner.weaponType];
         const flip = Math.abs(this.owner.aimDir) > Math.PI / 2;
-        const dir = Math.atan2(weaponInfo[this.owner.weaponType].fireY * (flip ? -1 : 1), -weaponInfo[this.owner.weaponType].fireX) + this.owner.aimDir;
-        const mag = Math.sqrt(Math.pow(weaponInfo[this.owner.weaponType].fireY, 2) + Math.pow(weaponInfo[this.owner.weaponType].fireX, 2)) / 2;
+        const dir = Math.atan2(info.fireY * info.scale * (flip ? -1 : 1), -info.fireX * info.scale) + this.owner.aimDir;
+        const mag = Math.sqrt(Math.pow(info.fireY * info.scale, 2) + Math.pow(info.fireX * info.scale, 2)) / 2;
 
         const x = this.x + this.owner.x + this.owner.width / 2 - Math.cos(dir) * mag;
         const y = this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag;
-        const randDir = Math.PI / 20;
+        const randDir = Math.PI / (100 * info.accuracy);
         const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
-        this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, speed: 8 });
+        this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, ...info });
         this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, colorFunction: 1 });
 
         this.magOffset = 0.3;
     }
 
+    reload() {
+        if (this.reloadTimer > 0 || this.carryingAmmo <= 0 || this.ammo === weaponInfo[this.owner.weaponType].magSize) return;
+        this.reloadTimer = weaponInfo[this.owner.weaponType].reloadTime;
+    }
+
     update(deltaTime) {
+        const info = weaponInfo[this.owner.weaponType];
         this.x = Math.cos(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
         this.y = Math.sin(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
         if (this.magOffset > 0) this.magOffset -= 0.1;
         else if (this.magOffset < 0) this.magOffset = 0;
 
-        if (this.firing) {
-            this.firingTimer -= deltaTime;
+        if (this.firing && this.reloadTimer <= 0) {
+            if (info.auto) this.firingTimer -= deltaTime;
             if (this.firingTimer <= 0) {
                 this.fire();
-                this.firingTimer = this.fireGap;
+                this.firingTimer = info.fireGap;
             }
-        } else this.firingTimer = 0;
+        } else if (info.auto && this.firingTimer > 0)
+            this.firingTimer -= deltaTime;
+        else this.firingTimer = 0;
+
+        if (this.reloadTimer > 0) {
+            this.reloadTimer -= deltaTime;
+            if (this.reloadTimer <= 0) {
+                this.reloadTimer = 0;
+                this.carryingAmmo -= info.magSize - this.ammo;
+                this.ammo = info.magSize;
+                if (this.carryingAmmo < 0) {
+                    this.ammo += this.carryingAmmo;
+                    this.carryingAmmo = 0;
+                }
+            }
+        }
     }
 
     render() {
-        const { x, y, width, height } = this.owner.game.onScreen({
-            x: this.x + this.owner.x + this.owner.width / 2,
-            y: this.y + this.owner.y + this.owner.height / 2,
-            width: this.width,
-            height: this.height
-        });
-        const flip = Math.abs(this.owner.aimDir) > Math.PI / 2;
+        const info = weaponInfo[this.owner.weaponType];
         const spriteWidth = 33;
         const spriteHeight = 17;
         const spriteX = (this.owner.weaponType % 4) * spriteWidth;
         const spriteY = Math.floor(this.owner.weaponType / 4) * spriteHeight + 0.5;
+        const flip = Math.abs(this.owner.aimDir) > Math.PI / 2;
+        const { x, y, width, height } = this.owner.game.onScreen({
+            x: this.x + this.owner.x + this.owner.width / 2,
+            y: this.y + this.owner.y + this.owner.height / 2,
+            width: spriteWidth * info.scale,
+            height: spriteHeight * info.scale
+        });
         this.owner.game.ctx.save();
         this.owner.game.ctx.translate(x, y);
-        // this.owner.game.ctx.rotate(this.owner.aimDir);
+        this.owner.game.ctx.rotate(this.owner.aimDir + this.reloadTimer * Math.PI * 2 / info.reloadTime);
         // ............................................// tilt up with ease out cubic function
-        this.owner.game.ctx.rotate(this.owner.aimDir + (flip ? 0.2 : -0.2) * (1 - Math.pow(1 - (this.firingTimer / this.fireGap), 3)));
+        // this.owner.game.ctx.rotate(this.owner.aimDir + (flip ? 0.2 : -0.2) * (1 - Math.pow(1 - (this.firingTimer / info.fireGap), 3)));
         if (flip)
             this.owner.game.ctx.scale(1, -1);
         this.owner.game.ctx.drawImage(this.owner.game.sprites[2],
             spriteX, spriteY, spriteWidth, spriteHeight,
-            -weaponInfo[this.owner.weaponType].gripX * this.owner.game.scale,
-            -weaponInfo[this.owner.weaponType].gripY * this.owner.game.scale, width, height);
+            -info.gripX * this.owner.game.scale * info.scale,
+            -info.gripY * this.owner.game.scale * info.scale, width, height);
         this.owner.game.ctx.restore();
-
 
         // this.owner.game.ctx.fillStyle = 'red';
         // this.owner.game.ctx.fillRect(x, y, 2, 2);
 
-        // const dir = Math.atan2(weaponInfo[this.owner.weaponType].fireY * (flip ? -1 : 1), -weaponInfo[this.owner.weaponType].fireX) + this.owner.aimDir;
-        // const mag = Math.sqrt(Math.pow(weaponInfo[this.owner.weaponType].fireY, 2) + Math.pow(weaponInfo[this.owner.weaponType].fireX, 2)) / 2;
+        // const dir = Math.atan2(info.fireY * info.scale * (flip ? -1 : 1), -info.fireX * info.scale) + this.owner.aimDir;
+        // const mag = Math.sqrt(Math.pow(info.fireY * info.scale, 2) + Math.pow(info.fireX * info.scale, 2)) / 2;
         // const firePoint = this.owner.game.onScreen({
         //     x: this.x + this.owner.x + this.owner.width / 2 - Math.cos(dir) * mag,
         //     y: this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag
         // });
         // this.owner.game.ctx.fillStyle = 'yellow';
         // this.owner.game.ctx.fillRect(firePoint.x, firePoint.y, 2, 2);
+
+        this.renderInfo();
+    }
+
+    renderInfo() {
+        const spriteWidth = 33;
+        const spriteHeight = 17;
+        const spriteX = (this.owner.weaponType % 4) * spriteWidth;
+        const spriteY = Math.floor(this.owner.weaponType / 4) * spriteHeight + 0.5;
+        const displayScale = 5;
+        this.owner.game.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+        this.owner.game.ctx.fillRect(20, this.owner.game.canvas.height - spriteHeight * displayScale - 20,
+            spriteWidth * displayScale, spriteHeight * displayScale);
+        this.owner.game.ctx.lineWidth = 5;
+        this.owner.game.ctx.strokeStyle = 'black';
+        this.owner.game.ctx.strokeRect(20, this.owner.game.canvas.height - spriteHeight * displayScale - 20,
+            spriteWidth * displayScale, spriteHeight * displayScale);
+        this.owner.game.ctx.drawImage(this.owner.game.sprites[2],
+            spriteX, spriteY, spriteWidth, spriteHeight,
+            20, this.owner.game.canvas.height - spriteHeight * displayScale - 20,
+            spriteWidth * displayScale, spriteHeight * displayScale);
+
+        this.owner.game.ctx.font = "30px consolas";
+        this.owner.game.ctx.fillStyle = "white";
+        this.owner.game.ctx.textAlign = "left";
+        this.owner.game.ctx.fillText(`${(this.ammo + '').padStart(3, '0')}`, 50, this.owner.game.canvas.height - spriteHeight * displayScale - 30);
+
+        this.owner.game.ctx.font = "20px consolas";
+        this.owner.game.ctx.fillText(`/${(this.carryingAmmo + '').padStart(3, '0')}`, 100, this.owner.game.canvas.height - spriteHeight * displayScale - 30);
+
+        this.owner.game.ctx.drawImage(this.owner.game.sprites[3], 0, 0, 32, 32, 25, this.owner.game.canvas.height - spriteHeight * displayScale - 50, 20, 20);
     }
 
 }

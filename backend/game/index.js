@@ -18,15 +18,12 @@ try {
     CLASS_PARTICLE = require('./classes').CLASS_PARTICLE;
     CLASS_SPARKS = require('./classes').CLASS_SPARKS;
     CLASS_FIRE = require('./classes').CLASS_FIRE;
-
-    initMap = require('./map');
 } catch (err) { }
 
 class Game {
 
     constructor() {
         this.init();
-        initMap(this);
     }
 
     init() {
@@ -64,7 +61,16 @@ class Game {
                 default: return new GameObject(this, info);
             }
         })();
-        (classType === CLASS_BLOCK ? this.blocks : this.objects).push(object);
+        if (classType === CLASS_CHARACTER) {
+            
+        } else if (classType === CLASS_BLOCK) {
+            if (getId) for (const block of this.blocks)
+                if (block.x === object.x && block.y === object.y)
+                    return object;
+            this.blocks.push(object);
+            return object;
+        }
+        this.objects.push(object);
         return object;
     }
 
@@ -129,18 +135,18 @@ class Game {
 
         // this.scale = Math.max(this.canvas.width, this.canvas.height) / 300;
 
-        const { x, y, height } = this.onScreen({ x: 0, y: -100, height: 500 });
-        const skyGradient = this.ctx.createLinearGradient(x, y, x, height);
-        skyGradient.addColorStop(0, '#070B34');
-        skyGradient.addColorStop(0.2, '#141852');
-        skyGradient.addColorStop(0.4, '#2B2F77');
-        skyGradient.addColorStop(0.6, '#483475');
-        skyGradient.addColorStop(0.8, '#6B4984');
-        skyGradient.addColorStop(1, '#855988');
+        // const { x, y, height } = this.onScreen({ x: 0, y: -100, height: 500 });
+        // const skyGradient = this.ctx.createLinearGradient(x, y, x, height);
+        // skyGradient.addColorStop(0, '#070B34');
+        // skyGradient.addColorStop(0.2, '#141852');
+        // skyGradient.addColorStop(0.4, '#2B2F77');
+        // skyGradient.addColorStop(0.6, '#483475');
+        // skyGradient.addColorStop(0.8, '#6B4984');
+        // skyGradient.addColorStop(1, '#855988');
 
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
-        this.ctx.fillStyle = skyGradient;
+        this.ctx.fillStyle = '#070B34';
         this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
         this.ctx.imageSmoothingEnabled = false;

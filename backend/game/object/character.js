@@ -10,7 +10,7 @@ class Character extends GameObject {
 
     constructor(game, initInfo) {
         super(game, {
-            character: 6,
+            character: 3,
             name: '',
             width: 7,
             height: 10,
@@ -26,7 +26,7 @@ class Character extends GameObject {
 
             // weapon
             aimDir: 0,
-            weaponType: 4,
+            weaponType: 1,
             ...initInfo
         });
     }
@@ -94,10 +94,11 @@ class Character extends GameObject {
         ]);
     }
 
-    hit(bullet) {
-        this.game.spawnParticle(CLASS_SPARKS, { x: this.x + this.width / 2, y: bullet.y, colorFunction: 2, amount: 50 });
+    hit(bullet, coll) {
         this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
         this.health = Math.max(0, this.health - bullet.damage);
+        for (const pt of coll)
+            if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
     }
 
     update(deltaTime) {

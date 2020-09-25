@@ -10,9 +10,11 @@ app.use(express.static('game'));
 
 // game
 const Game = require('./game/index.js');
-const { CLASS_CHARACTER, CLASS_BLOCK } = require('./game/classes.js');
+const { CLASS_CHARACTER } = require('./game/classes.js');
+const initMap = require('./game/map.js');
 
 const game = new Game();
+initMap(game);
 
 let startTime = Date.now();
 setInterval(() => {
@@ -34,15 +36,17 @@ setInterval(() => {
 const clients = [];
 io.on('connection', socket => {
     const client = {
-        player: game.spawnObject(CLASS_CHARACTER, { y: 25 }),
+        player: game.spawnObject(CLASS_CHARACTER),
         update: () => {
             if (client.player.removed) {
-                client.player = game.spawnObject(CLASS_CHARACTER, { y: 25, name: client.player.name });
+                client.player = game.spawnObject(CLASS_CHARACTER, { name: client.player.name });
                 socket.emit('player-id', client.player.objectId);
             }
         },
     };
     clients.push(client);
+
+    console.log(socket.handshake.address);
 
     socket.emit('player-id', client.player.objectId);
 
@@ -50,6 +54,7 @@ io.on('connection', socket => {
     socket.on('player-aim', aim => client.player.aimDir = aim);
     socket.on('player-fire', fire => client.player.weapon.firing = fire);
     socket.on('player-name', name => client.player.name = name);
+    socket.on('player-reload', () => client.player.weapon.reload());
 
     socket.on('disconnect', () => {
         client.player.removed = true;
