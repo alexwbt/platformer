@@ -7,23 +7,33 @@ class Fire extends Particle {
 
     constructor(game, initInfo) {
         super(game, {
+            fireType: 0,
             width: 10,
             height: 10,
             shape: SHAPE_RECT,
 
             ...initInfo
         });
-
-        this.indices = [
-            0, 1, 3, 2, 3
-        ];
     }
 
     setInfo(info) {
         super.setInfo(info);
+        this.fireType = info.fireType;
         this.width = info.width;
         this.height = info.height;
         this.shape = info.shape;
+    }
+
+    setData(data) {
+        let i = super.setData(data);
+        this.fireType = data[i++];
+        return i;
+    }
+
+    getData() {
+        return super.getData().concat([
+            this.fireType
+        ]);
     }
 
     update(deltaTime) {
@@ -33,13 +43,10 @@ class Fire extends Particle {
     render() {
         const { x, y, width, height, onScreen } = this.game.onScreen(this);
         if (!onScreen) return;
-
-        const index = Math.floor((this.passTime * 12) % this.indices.length);
-        const spriteSize = 8;
-        const spriteX = this.indices[index] % 2 * spriteSize;
-        const spriteY = Math.floor(this.indices[index] / 2) * spriteSize;
-
-        super.renderSprite(this.game.sprites[0], 56 + spriteX, 24 + spriteY, 8, 8, x, y, width, height);
+        const index = Math.floor((this.passTime * 12) % 4);
+        const spriteX = (index + 4.1) * 8;
+        const spriteY = (this.fireType * 8) + 0.1;
+        super.renderSprite(this.game.sprites[0], spriteX, spriteY, 7.8, 7.8, x, y, width, height);
     }
 
 }

@@ -116,7 +116,7 @@ class GameObject {
                 }
             }
         }
-        if (Math.abs(this.y) > 1500) this.removed = true;
+        if (this.game.deadline && this.y > this.game.deadline) this.removed = true;
 
         for (const obj of this.game.objects) {
             if (obj.shape === SHAPE_RECT && collision(obj, this)) {

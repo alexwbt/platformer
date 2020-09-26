@@ -7,7 +7,7 @@ const weaponInfo = [
     { // pistol
         gripX: 13,
         gripY: 9,
-        fireX: 19,
+        fireX: 17,
         fireY: 6,
         auto: false,
         fireGap: 0.1,
@@ -55,10 +55,10 @@ const weaponInfo = [
     { // double barrow shotgun
         gripX: 13,
         gripY: 9,
-        fireX: 35,
+        fireX: 28,
         fireY: 7,
         auto: false,
-        fireGap: 0.01,
+        fireGap: 0.1,
         scale: 0.5,
         damage: 0.3,
         accuracy: 0.05,
@@ -71,14 +71,14 @@ const weaponInfo = [
     { // DMR
         gripX: 13,
         gripY: 9,
-        fireX: 35,
-        fireY: 7,
+        fireX: 36,
+        fireY: 5,
         auto: false,
         fireGap: 0.25,
         scale: 0.5,
         damage: 0.5,
         accuracy: 0.5,
-        speed: 10,
+        speed: 12,
         travelTime: 0.3,
         magSize: 20,
         reloadTime: 2,
@@ -87,15 +87,15 @@ const weaponInfo = [
     { // sniper rifle
         gripX: 13,
         gripY: 9,
-        fireX: 35,
-        fireY: 7,
+        fireX: 40,
+        fireY: 1,
         auto: false,
         fireGap: 0.5,
         scale: 0.5,
         damage: 0.9,
         accuracy: 1,
         speed: 13,
-        travelTime: 0.3,
+        travelTime: 0.35,
         magSize: 6,
         reloadTime: 3,
         projectile: 1,
@@ -112,6 +112,7 @@ class Weapon {
             magOffset: 0,
             firing: false,
             firingTimer: 0,
+            released: false,
             ammo: weaponInfo[this.owner.weaponType].magSize,
             carryingAmmo: 200,
             reloadTimer: 0,
@@ -125,6 +126,7 @@ class Weapon {
         this.magOffset = info.magOffset;
         this.firing = info.firing;
         this.firingTimer = info.firingTimer;
+        this.released = info.released;
         this.ammo = info.ammo;
         this.reloadTimer = info.reloadTimer;
         this.carryingAmmo = info.carryingAmmo;
@@ -137,6 +139,7 @@ class Weapon {
         this.magOffset = data[i++];
         this.firing = data[i++];
         this.firingTimer = data[i++];
+        this.released = data[i++];
         this.ammo = data[i++];
         this.reloadTimer = data[i++];
         this.carryingAmmo = data[i++];
@@ -150,6 +153,7 @@ class Weapon {
             this.magOffset,
             this.firing,
             this.firingTimer,
+            this.released,
             this.ammo,
             this.reloadTimer,
             this.carryingAmmo,
@@ -164,8 +168,8 @@ class Weapon {
         const dir = Math.atan2(info.fireY * info.scale * (flip ? -1 : 1), -info.fireX * info.scale) + this.owner.aimDir;
         const mag = Math.sqrt(Math.pow(info.fireY * info.scale, 2) + Math.pow(info.fireX * info.scale, 2)) / 2;
 
-        const x = this.x + this.owner.x + this.owner.width / 2 - Math.cos(dir) * mag;
-        const y = this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag;
+        const x = this.x - Math.cos(dir) * mag;
+        const y = this.y - Math.sin(dir) * mag;
         for (let i = 0; i < info.projectile; i++) {
             const randDir = Math.PI / (100 * info.accuracy);
             const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
@@ -183,20 +187,19 @@ class Weapon {
 
     update(deltaTime) {
         const info = weaponInfo[this.owner.weaponType];
-        this.x = Math.cos(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
-        this.y = Math.sin(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
+        this.x = this.owner.x + this.owner.width / 2 + Math.cos(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
+        this.y = this.owner.y + this.owner.height / 2 + Math.sin(this.owner.aimDir) * this.owner.width * 0.7 * (1 - this.magOffset);
         if (this.magOffset > 0) this.magOffset -= 0.1;
         else if (this.magOffset < 0) this.magOffset = 0;
 
+        this.firingTimer -= deltaTime;
         if (this.firing && this.reloadTimer <= 0) {
-            if (info.auto) this.firingTimer -= deltaTime;
-            if (this.firingTimer <= 0) {
+            if (this.firingTimer <= 0 && this.ammo > 0 && (info.auto || this.released)) {
                 this.fire();
                 this.firingTimer = info.fireGap;
             }
-        } else if (this.firingTimer > 0)
-            this.firingTimer -= deltaTime;
-        else this.firingTimer = 0;
+            this.released = false;
+        } else this.released = true;
 
         if (this.reloadTimer > 0) {
             this.reloadTimer -= deltaTime;
@@ -220,16 +223,13 @@ class Weapon {
         const spriteY = Math.floor(this.owner.weaponType / 4) * spriteHeight + 0.5;
         const flip = Math.abs(this.owner.aimDir) > Math.PI / 2;
         const { x, y, width, height } = this.owner.game.onScreen({
-            x: this.x + this.owner.x + this.owner.width / 2,
-            y: this.y + this.owner.y + this.owner.height / 2,
+            x: this.x, y: this.y,
             width: spriteWidth * info.scale,
             height: spriteHeight * info.scale
         });
         this.owner.game.ctx.save();
         this.owner.game.ctx.translate(x, y);
         this.owner.game.ctx.rotate(this.owner.aimDir + this.reloadTimer * Math.PI * 2 / info.reloadTime);
-        // ............................................// tilt up with ease out cubic function
-        // this.owner.game.ctx.rotate(this.owner.aimDir + (flip ? 0.2 : -0.2) * (1 - Math.pow(1 - (this.firingTimer / info.fireGap), 3)));
         if (flip)
             this.owner.game.ctx.scale(1, -1);
         this.owner.game.ctx.drawImage(this.owner.game.sprites[2],
@@ -259,7 +259,7 @@ class Weapon {
         const displayScale = 5;
         this.owner.game.ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
         this.owner.game.ctx.fillRect(20, this.owner.game.canvas.height - spriteHeight * displayScale - 20,
-            spriteWidth * displayScale, spriteHeight * displayScale);
+            spriteWidth * displayScale * Math.min(1, 1 - this.firingTimer / weaponInfo[this.owner.weaponType].fireGap), spriteHeight * displayScale);
         this.owner.game.ctx.lineWidth = 5;
         this.owner.game.ctx.strokeStyle = 'black';
         this.owner.game.ctx.strokeRect(20, this.owner.game.canvas.height - spriteHeight * displayScale - 20,

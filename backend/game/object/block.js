@@ -38,18 +38,11 @@ class Block extends GameObject {
         const { x, y, width, height, onScreen } = this.game.onScreen(this);
         if (!onScreen) return;
 
-        switch (this.blockType) {
-            case 1:
-                super.renderSprite(this.game.sprites[0], 24, 8, 8, 8, x, y, width, height);
-                super.renderSprite(this.game.sprites[0], 32, 56, 8, 8, x, y, width, height);
-                break;
-            case 2:
-                super.renderSprite(this.game.sprites[0], 0, 0, 8, 8, x, y, width, height);
-                super.renderSprite(this.game.sprites[0], 32, 64, 8, 8, x, y, width, height);
-                break;
-            default:
-                super.renderSprite(this.game.sprites[0], 0, 0, 16, 16, x, y, width, height);
-        }
+        const spriteSize = 8;
+        const spriteX = ((this.blockType - 1) % 8) * spriteSize;
+        const spriteY = Math.floor((this.blockType - 1) / 8) * spriteSize;
+        
+        super.renderSprite(this.game.sprites[0], spriteX, spriteY, spriteSize, spriteSize, x, y, width, height);
     }
 
 }

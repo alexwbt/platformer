@@ -3,6 +3,7 @@ try {
     Block = require('./object/block');
     Character = require('./object/character');
     Bullet = require('./object/bullet');
+    Mob = require('./object/mob');
 
     Particle = require('./particle');
     Sparks = require('./particle/sparks');
@@ -14,6 +15,7 @@ try {
     CLASS_BLOCK = require('./classes').CLASS_BLOCK;
     CLASS_CHARACTER = require('./classes').CLASS_CHARACTER;
     CLASS_BULLET = require('./classes').CLASS_BULLET;
+    CLASS_MOB = require('./classes').CLASS_MOB;
 
     CLASS_PARTICLE = require('./classes').CLASS_PARTICLE;
     CLASS_SPARKS = require('./classes').CLASS_SPARKS;
@@ -37,6 +39,10 @@ class Game {
         this.particles = [];
         this.blocks = [];
         this.spawnList = [];
+
+        this.playerSpawnPoints = [];
+        this.mobSpawnPoints = [];
+        this.deadline = 0;
     }
 
     setCanvas(canvas, spriteSources) {
@@ -58,11 +64,14 @@ class Game {
                 case CLASS_BLOCK: return new Block(this, info);
                 case CLASS_CHARACTER: return new Character(this, info);
                 case CLASS_BULLET: return new Bullet(this, info);
+                case CLASS_MOB: return new Mob(this, info);
                 default: return new GameObject(this, info);
             }
         })();
-        if (classType === CLASS_CHARACTER) {
-
+        if (classType === CLASS_CHARACTER && this.playerSpawnPoints.length > 0) {
+            const spawnPoint = this.playerSpawnPoints[Math.floor(Math.random() * this.playerSpawnPoints.length)];
+            object.x = spawnPoint.x;
+            object.y = spawnPoint.y;
         } else if (classType === CLASS_BLOCK) {
             if (getId) for (const block of this.blocks)
                 if (block.x === object.x && block.y === object.y)
@@ -124,7 +133,6 @@ class Game {
                 this.camera.y = o.y + o.height / 2;
             }
             o.update(deltaTime);
-
         });
         this.objects = this.objects.filter(o => !o.removed);
     }

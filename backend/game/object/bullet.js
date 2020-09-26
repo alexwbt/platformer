@@ -4,7 +4,8 @@ try {
     collision = require('../collision').collision;
     Sparks = require("../particle/sparks");
     CLASS_SPARKS = require('../classes').CLASS_SPARKS;
-    CLASS_CHARACTER = require("../classes").CLASS_SPARKS;
+    CLASS_CHARACTER = require("../classes").CLASS_CHARACTER;
+    CLASS_MOB = require("../classes").CLASS_MOB;
 } catch (err) { }
 
 class Bullet extends GameObject {
@@ -84,7 +85,7 @@ class Bullet extends GameObject {
         }
 
         for (const obj of this.game.objects) {
-            if (obj.classType === CLASS_CHARACTER) {
+            if (obj.classType === CLASS_CHARACTER || obj.classType === CLASS_MOB) {
                 const coll = collision(obj, this);
                 if (coll) {
                     obj.hit(this, coll);

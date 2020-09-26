@@ -10,7 +10,7 @@ app.use(express.static('game'));
 
 // game
 const Game = require('./game/index.js');
-const { CLASS_CHARACTER } = require('./game/classes.js');
+const { CLASS_CHARACTER, CLASS_MOB } = require('./game/classes.js');
 const initMap = require('./game/map.js');
 
 const game = new Game();
@@ -23,6 +23,14 @@ setInterval(() => {
     startTime = now;
     game.update(deltaTime);
 }, 1000 / 60);
+
+setInterval(() => {
+    game.mobSpawnPoints.forEach(point => {
+        // if (Math.random() < 0.3) {
+        // }
+        game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
+    });
+}, 3000);
 
 setInterval(() => {
     io.emit('game-data', game.getData());
@@ -39,7 +47,10 @@ io.on('connection', socket => {
         player: game.spawnObject(CLASS_CHARACTER),
         update: () => {
             if (client.player.removed) {
-                client.player = game.spawnObject(CLASS_CHARACTER, { name: client.player.name });
+                client.player = game.spawnObject(CLASS_CHARACTER, {
+                    name: client.player.name,
+                    character: client.player.character
+                });
                 socket.emit('player-id', client.player.objectId);
             }
         },
@@ -53,8 +64,9 @@ io.on('connection', socket => {
     socket.on('player-control', controls => client.player.controls = controls);
     socket.on('player-aim', aim => client.player.aimDir = aim);
     socket.on('player-fire', fire => client.player.weapon.firing = fire);
-    socket.on('player-name', name => client.player.name = name);
     socket.on('player-reload', () => client.player.weapon.reload());
+    socket.on('player-name', name => client.player.name = name);
+    socket.on('player-char', char => client.player.character = char);
 
     socket.on('disconnect', () => {
         client.player.removed = true;

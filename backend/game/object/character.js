@@ -10,7 +10,7 @@ class Character extends GameObject {
 
     constructor(game, initInfo) {
         super(game, {
-            character: 3,
+            character: 0,
             name: '',
             width: 7,
             height: 10,
@@ -48,7 +48,8 @@ class Character extends GameObject {
         // weapon
         this.aimDir = info.aimDir;
         this.weaponType = info.weaponType;
-        this.weapon = new Weapon(this);
+        if (this.weaponType >= 0)
+            this.weapon = new Weapon(this);
     }
 
     setData(data) {
@@ -68,8 +69,10 @@ class Character extends GameObject {
         // weapon
         this.aimDir = data[i++];
         this.weaponType = data[i++];
-        this.weapon = new Weapon(this);
-        this.weapon.setData(data[i++]);
+        if (this.weaponType >= 0) {
+            this.weapon = new Weapon(this);
+            this.weapon.setData(data[i++]);
+        }
         return i;
     }
 
@@ -90,7 +93,7 @@ class Character extends GameObject {
             // weapon
             this.aimDir,
             this.weaponType,
-            this.weapon.getData()
+            this.weaponType >= 0 && this.weapon.getData()
         ]);
     }
 
@@ -150,7 +153,8 @@ class Character extends GameObject {
             this.removed = true;
         }
 
-        this.weapon.update(deltaTime);
+        if (this.weaponType >= 0)
+            this.weapon.update(deltaTime);
     }
 
     render() {
@@ -161,8 +165,8 @@ class Character extends GameObject {
         const originY = y + height;
 
         const spriteSize = 16;
-        const spriteX = (this.character % 8) * spriteSize;
-        const spriteY = Math.floor(this.character / 8) * spriteSize
+        const spriteX = (this.character % 8) * spriteSize + 0.1;
+        const spriteY = Math.floor(this.character / 8) * spriteSize + 0.1
 
         this.game.ctx.save();
         this.game.ctx.translate(originX, originY);
@@ -176,10 +180,11 @@ class Character extends GameObject {
             yOffset = Math.pow(Math.sin(this.movedTime * 2 * 2 * Math.PI), 2) / 2;
         }
         if (this.lookingLeft) this.game.ctx.scale(-1, 1);
-        this.renderSprite(this.game.sprites[1], spriteX + 0.1, spriteY + 0.1, spriteSize - 0.1, spriteSize - 0.1, -height / 2, -height - yOffset * 10, height, height);
+        this.renderSprite(this.game.sprites[1], spriteX, spriteY, spriteSize - 0.2, spriteSize - 0.2, -height / 2, -height - yOffset * 10, height, height);
         this.game.ctx.restore();
 
-        this.weapon.render();
+        if (this.weaponType >= 0)
+            this.weapon.render();
 
         if (this.name) {
             this.game.ctx.font = `${4 * this.game.scale}px consolas`;
