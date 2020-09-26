@@ -11,11 +11,10 @@ let playerId = 0;
 // game.cameraFocusId = player.objectId;
 
 const socket = io(SERVER);
+window.socket = socket;
 
 socket.on('connect', () => {
     console.log('socket connected');
-
-    socket.emit('player-name', 'alex');
 });
 
 socket.on('player-id', id => {
@@ -73,9 +72,17 @@ window.addEventListener('mousemove', e => {
 });
 
 window.addEventListener('mousedown', e => {
-    if (player && e.button === 0) {
-        player.weapon.firing = true;
-        socket.emit('player-fire', true);
+    if (player) {
+        switch (e.button) {
+            case 0:
+                player.weapon.firing = true;
+                socket.emit('player-fire', true);
+                break;
+            case 2:
+                socket.emit('player-reload');
+                break;
+            default:
+        }
     }
 });
 
@@ -86,6 +93,24 @@ window.addEventListener('mouseup', e => {
     }
 });
 
+window.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    return false;
+});
+
 window.addEventListener('mousewheel', e => {
     game.scale = Math.max(1, game.scale - e.deltaY / 100);
 });
+
+window.onblur = () => {
+    if (player) {
+        player.weapon.firing = false;
+        player.controls[0] = false;
+        player.controls[1] = false;
+        player.controls[2] = false;
+        player.controls[3] = false;
+        player.controls[4] = false;
+        socket.emit('player-control', player.controls);
+        socket.emit('player-fire', false);
+    }
+};
