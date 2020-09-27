@@ -3,13 +3,16 @@ const { CLASS_BLOCK, CLASS_FIRE } = require('./classes');
 
 const initMap = game => {
     PNG.decode(__dirname + '/resource/map.png', pixels => {
+        const mapSize = 512;
         const blockSize = 10;
-        let lowestY = 0;
+        const bounds = { x1: mapSize, y1: mapSize, x2: 0, y2: 0 };
         for (let i = 0; i < pixels.length; i++) {
             const value = pixels[i * 4];
             if (value > 0) {
-                const x = (i % 512) * blockSize;
-                const y = Math.floor(i / 512) * blockSize;
+                const ix = i % mapSize;
+                const iy = Math.floor(i / mapSize);
+                const x = ix * blockSize;
+                const y = iy * blockSize;
                 switch (value) {
                     case 3:
                         game.playerSpawnPoints.push({ x, y: y - blockSize });
@@ -22,10 +25,24 @@ const initMap = game => {
                     default:
                 }
                 game.spawnObject(CLASS_BLOCK, { x, y, blockType: value });
-                if (y > lowestY) lowestY = y;
+                if (ix < bounds.x1) bounds.x1 = ix;
+                else if (ix > bounds.x2) bounds.x2 = ix;
+                if (iy < bounds.y1) bounds.y1 = iy;
+                else if (iy > bounds.y2) bounds.y2 = iy;
             }
         }
-        game.deadline = lowestY + 500;
+        game.mapData = [];
+        for (let x = bounds.x1; x <= bounds.x2; x++) {
+            const ix = x - bounds.x1;
+            game.mapData[ix] = [];
+            for (let y = bounds.y1; y <= bounds.y2; y++) {
+                const iy = y - bounds.y1;
+                const index = (y * mapSize + x) * 4;
+                game.mapData[ix][iy] = pixels[index];
+            }
+        }
+        game.bounds = bounds;
+        game.deadline = bounds.y2 * blockSize + 500;
     });
 };
 

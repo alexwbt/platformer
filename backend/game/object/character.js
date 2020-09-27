@@ -98,17 +98,15 @@ class Character extends GameObject {
     }
 
     hit(bullet, coll) {
-        this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
-        this.health = Math.max(0, this.health - bullet.damage);
-        for (const pt of coll)
-            if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
+        if (bullet) {
+            this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
+            this.health = Math.max(0, this.health - bullet.damage);
+            for (const pt of coll)
+                if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
+        } else this.game.spawnParticle(CLASS_SPARKS, { ...this.getCenter(), colorFunction: 2, amount: 30 });
     }
 
     update(deltaTime) {
-        super.update();
-
-        this.yVelocity += 0.3;
-
         // jump
         if (this.onGround)
             this.jumpHold = 0;
@@ -152,6 +150,9 @@ class Character extends GameObject {
         if (this.health <= 0) {
             this.removed = true;
         }
+
+        super.update();
+        this.yVelocity += 0.3;
 
         if (this.weaponType >= 0)
             this.weapon.update(deltaTime);
@@ -198,7 +199,8 @@ class Character extends GameObject {
         this.game.ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
         this.game.ctx.fillRect(x, y - 3 * this.game.scale, width * this.health, 1.5 * this.game.scale);
 
-        // this.renderHitBox();
+        if (this.game.renderHitBox)
+            this.renderHitBox();
     }
 
 }

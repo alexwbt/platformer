@@ -40,9 +40,13 @@ class Game {
         this.blocks = [];
         this.spawnList = [];
 
+        this.updatedBlocks = false;
+        this.updatedMapData = false;
+
         this.playerSpawnPoints = [];
         this.mobSpawnPoints = [];
         this.deadline = 0;
+        this.mapData = false;
     }
 
     setCanvas(canvas, spriteSources) {
@@ -73,6 +77,7 @@ class Game {
             object.x = spawnPoint.x;
             object.y = spawnPoint.y;
         } else if (classType === CLASS_BLOCK) {
+            this.updatedBlocks = true;
             if (getId) for (const block of this.blocks)
                 if (block.x === object.x && block.y === object.y)
                     return object;
@@ -100,26 +105,37 @@ class Game {
         return {
             particles: this.particles.map(p => p.getData()),
             objects: this.objects.map(o => o.getData()),
-            blocks: this.blocks.map(b => b.getData())
         };
     }
 
     setData(data) {
-        this.particles.length = 0;
-        this.objects.length = 0;
-        this.blocks.length = 0;
-        data.particles.forEach(data => {
-            const particle = this.spawnParticle(data[0]);
-            particle.setData(data);
-        });
-        data.objects.forEach(data => {
-            const object = this.spawnObject(data[0], {}, false);
-            object.setData(data);
-        });
-        data.blocks.forEach(data => {
-            const block = this.spawnObject(data[0], {}, false);
-            block.setData(data);
-        });
+        if (data.particles) {
+            this.particles.length = 0;
+            data.particles.forEach(data => {
+                const particle = this.spawnParticle(data[0]);
+                particle.setData(data);
+            });
+        }
+        if (data.objects) {
+            this.objects.length = 0;
+            data.objects.forEach(data => {
+                const object = this.spawnObject(data[0], {}, false);
+                object.setData(data);
+            });
+        }
+        if (data.blocks) {
+            this.blocks.length = 0;
+            data.blocks.forEach(data => {
+                const block = this.spawnObject(data[0], {}, false);
+                block.setData(data);
+            });
+        }
+        if (data.mapData) {
+            this.mapData = data.mapData;
+        }
+        if (data.bounds) {
+            this.bounds = data.bounds;
+        }
     }
 
     update(deltaTime) {
@@ -166,6 +182,25 @@ class Game {
             }
         });
         this.particles.forEach(p => p.render());
+
+        if (this.renderGrid && this.mapData && this.bounds) {
+            this.ctx.strokeStyle = 'red';
+            this.ctx.lineWidth = 1;
+            const gridSize = 10 * this.scale;
+            const os = this.onScreen({ x: 0, y: 0 });
+            for (let x = os.x % gridSize; x < this.canvas.width; x += gridSize) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(x, 0);
+                this.ctx.lineTo(x, this.canvas.height);
+                this.ctx.stroke();
+            }
+            for (let y = os.y % gridSize; y < this.canvas.height; y += gridSize) {
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, y);
+                this.ctx.lineTo(this.canvas.width, y);
+                this.ctx.stroke();
+            }
+        }
     }
 
     onScreen({ x, y, width, height, shape }) {

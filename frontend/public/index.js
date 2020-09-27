@@ -47,6 +47,9 @@ window.addEventListener('keydown', e => {
             case 'd': player.controls[3] = true; break;
             case ' ': player.controls[4] = true; break;
             case 'r': socket.emit('player-reload'); break;
+            case 'f1': e.preventDefault(); game.renderGrid = !game.renderGrid; break;
+            case 'f2': e.preventDefault(); game.renderWeaponPoints = !game.renderWeaponPoints; break;
+            case 'f3': e.preventDefault(); game.renderHitBox = !game.renderHitBox; break;
         }
         socket.emit('player-control', player.controls);
     }

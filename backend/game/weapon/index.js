@@ -19,6 +19,7 @@ const weaponInfo = [
         magSize: 12,
         reloadTime: 1,
         projectile: 1,
+        carry: 120,
     },
     { // submachine gun
         gripX: 13,
@@ -35,6 +36,7 @@ const weaponInfo = [
         magSize: 21,
         reloadTime: 1,
         projectile: 1,
+        carry: 210,
     },
     { // machine gun
         gripX: 13,
@@ -51,6 +53,7 @@ const weaponInfo = [
         magSize: 100,
         reloadTime: 6,
         projectile: 1,
+        carry: 200,
     },
     { // double barrow shotgun
         gripX: 13,
@@ -67,6 +70,7 @@ const weaponInfo = [
         magSize: 2,
         reloadTime: 1,
         projectile: 5,
+        carry: 50,
     },
     { // DMR
         gripX: 13,
@@ -78,11 +82,12 @@ const weaponInfo = [
         scale: 0.5,
         damage: 0.5,
         accuracy: 0.5,
-        speed: 12,
+        speed: 14,
         travelTime: 0.3,
         magSize: 20,
         reloadTime: 2,
         projectile: 1,
+        carry: 100,
     },
     { // sniper rifle
         gripX: 13,
@@ -94,11 +99,12 @@ const weaponInfo = [
         scale: 0.5,
         damage: 0.9,
         accuracy: 1,
-        speed: 13,
+        speed: 16,
         travelTime: 0.35,
-        magSize: 6,
+        magSize: 11,
         reloadTime: 3,
         projectile: 1,
+        carry: 99,
     },
 ];
 
@@ -114,7 +120,7 @@ class Weapon {
             firingTimer: 0,
             released: false,
             ammo: weaponInfo[this.owner.weaponType].magSize,
-            carryingAmmo: 200,
+            carryingAmmo: weaponInfo[this.owner.weaponType].carry,
             reloadTimer: 0,
             ...initInfo
         });
@@ -238,17 +244,19 @@ class Weapon {
             -info.gripY * this.owner.game.scale * info.scale, width, height);
         this.owner.game.ctx.restore();
 
-        // this.owner.game.ctx.fillStyle = 'red';
-        // this.owner.game.ctx.fillRect(x, y, 2, 2);
+        if (this.owner.game.renderWeaponPoints) {
+            this.owner.game.ctx.fillStyle = 'red';
+            this.owner.game.ctx.fillRect(x, y, 2, 2);
 
-        // const dir = Math.atan2(info.fireY * info.scale * (flip ? -1 : 1), -info.fireX * info.scale) + this.owner.aimDir;
-        // const mag = Math.sqrt(Math.pow(info.fireY * info.scale, 2) + Math.pow(info.fireX * info.scale, 2)) / 2;
-        // const firePoint = this.owner.game.onScreen({
-        //     x: this.x + this.owner.x + this.owner.width / 2 - Math.cos(dir) * mag,
-        //     y: this.y + this.owner.y + this.owner.height / 2 - Math.sin(dir) * mag
-        // });
-        // this.owner.game.ctx.fillStyle = 'yellow';
-        // this.owner.game.ctx.fillRect(firePoint.x, firePoint.y, 2, 2);
+            const dir = Math.atan2(info.fireY * info.scale * (flip ? -1 : 1), -info.fireX * info.scale) + this.owner.aimDir;
+            const mag = Math.sqrt(Math.pow(info.fireY * info.scale, 2) + Math.pow(info.fireX * info.scale, 2)) / 2;
+            const firePoint = this.owner.game.onScreen({
+                x: this.x + - Math.cos(dir) * mag,
+                y: this.y + - Math.sin(dir) * mag
+            });
+            this.owner.game.ctx.fillStyle = 'yellow';
+            this.owner.game.ctx.fillRect(firePoint.x, firePoint.y, 2, 2);
+        }
     }
 
     renderInfo() {

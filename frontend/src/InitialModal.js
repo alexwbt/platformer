@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import styled from 'styled-components';
 import CharacterSelect from './CharacterSelet';
 import { useInput } from './hooks/Input';
@@ -65,16 +65,30 @@ const SubmitButton = styled.div`
 const InitialModal = () => {
     const [name, setName] = useInput('');
     const [show, setShow] = useState(true);
+    const ref = useRef();
 
     const onClose = useCallback(() => {
         const trimmedName = name.trim();
         if (name) {
-            window.socket.emit('player-name', trimmedName);
+            window.socket.emit('player-name', trimmedName.slice(-15));
             setShow(false);
         } else setName({ target: { value: null } });
     }, [name, setName]);
 
-    return show && <Container>
+    useEffect(() => {
+        if (ref.current) {
+            const current = ref.current;
+            const stopFunction = e => e.stopPropagation();
+            current.addEventListener('mousedown', stopFunction);
+            current.addEventListener('keydown', stopFunction);
+            return () => {
+                current.removeEventListener('mousedown', stopFunction);
+                current.removeEventListener('keydown', stopFunction);
+            };
+        }
+    }, [ref]);
+
+    return show && <Container ref={ref}>
         <Section>
             <Title red={name === null}>ENTER YOUR NAME</Title>
             <Input value={name || ''} onChange={setName} />

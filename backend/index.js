@@ -26,9 +26,16 @@ setInterval(() => {
 
 setInterval(() => {
     game.mobSpawnPoints.forEach(point => {
-        // if (Math.random() < 0.3) {
-        // }
-        game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
+        if ((() => {
+            for (const obj of game.objects)
+                if (obj.classType === CLASS_CHARACTER) {
+                    const dis = Math.pow(point.x - obj.x, 2) + Math.pow(point.y - obj.y, 2);
+                    if (dis < 40000) return true;
+                }
+            return false;
+        })() && Math.random() < 1) {
+            game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
+        }
     });
 }, 3000);
 
@@ -60,6 +67,11 @@ io.on('connection', socket => {
     console.log(socket.handshake.address);
 
     socket.emit('player-id', client.player.objectId);
+    socket.emit('game-data', {
+        blocks: game.blocks.map(b => b.getData()),
+        mapData: game.mapData,
+        bounds: game.bounds,
+    });
 
     socket.on('player-control', controls => client.player.controls = controls);
     socket.on('player-aim', aim => client.player.aimDir = aim);

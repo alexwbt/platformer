@@ -142,6 +142,7 @@ class GameObject {
         const { x, y, width, height, onScreen } = this.game.onScreen(this);
         if (!onScreen) return;
         this.game.ctx.strokeStyle = 'red';
+        this.game.ctx.lineWidth = 1;
         this.game.ctx.strokeRect(x, y, width, height);
     }
 
