@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
 import CharacterSelect from './CharacterSelet';
 import { useInput } from './hooks/Input';
@@ -70,23 +70,11 @@ const InitialModal = () => {
     const onClose = useCallback(() => {
         const trimmedName = name.trim();
         if (name) {
-            window.socket.emit('player-name', trimmedName.slice(-15));
+            window.socket.emit('player-name', trimmedName);
             setShow(false);
+            window.stopListening = false;
         } else setName({ target: { value: null } });
     }, [name, setName]);
-
-    useEffect(() => {
-        if (ref.current) {
-            const current = ref.current;
-            const stopFunction = e => e.stopPropagation();
-            current.addEventListener('mousedown', stopFunction);
-            current.addEventListener('keydown', stopFunction);
-            return () => {
-                current.removeEventListener('mousedown', stopFunction);
-                current.removeEventListener('keydown', stopFunction);
-            };
-        }
-    }, [ref]);
 
     return show && <Container ref={ref}>
         <Section>
@@ -113,6 +101,10 @@ const InitialModal = () => {
                 <div>
                     <span>Right click / R</span>
                     <span>Reload</span>
+                </div>
+                <div>
+                    <span>B</span>
+                    <span>Shop</span>
                 </div>
             </Controls>
             <SubmitButton onClick={onClose}>Enter</SubmitButton>

@@ -4,6 +4,7 @@ try {
     collision = require("../collision").collision;
     SHAPE_LINE = require("../collision").SHAPE_LINE;
     CLASS_SPARKS = require("../classes").CLASS_SPARKS;
+    CLASS_COIN = require("../classes").CLASS_COIN;
 } catch (err) { }
 
 class Character extends GameObject {
@@ -23,10 +24,11 @@ class Character extends GameObject {
             health: 1,
             jump: 0.2,
             jumpHold: 0,
+            coins: 0,
 
             // weapon
             aimDir: 0,
-            weaponType: Math.floor(Math.random() * 6),
+            weaponType: 0,
             ...initInfo
         });
     }
@@ -44,6 +46,7 @@ class Character extends GameObject {
         this.health = info.health;
         this.jump = info.jump;
         this.jumpHold = info.jumpHold;
+        this.coins = info.coins;
 
         // weapon
         this.aimDir = info.aimDir;
@@ -65,14 +68,16 @@ class Character extends GameObject {
         this.health = data[i++];
         this.jump = data[i++];
         this.jumpHold = data[i++];
+        this.coins = data[i++];
 
         // weapon
         this.aimDir = data[i++];
         this.weaponType = data[i++];
         if (this.weaponType >= 0) {
             this.weapon = new Weapon(this);
-            this.weapon.setData(data[i++]);
+            this.weapon.setData(data[i]);
         }
+        i++;
         return i;
     }
 
@@ -89,6 +94,7 @@ class Character extends GameObject {
             this.health,
             this.jump,
             this.jumpHold,
+            this.coins,
 
             // weapon
             this.aimDir,
@@ -149,6 +155,14 @@ class Character extends GameObject {
 
         if (this.health <= 0) {
             this.removed = true;
+            for (let i = 0; i < this.coins; i++) {
+                this.game.spawnObject(CLASS_COIN, {
+                    x: this.x,
+                    y: this.y,
+                    xVelocity: (Math.random() - 0.5) * 2,
+                    yVelocity: Math.random() - 0.5
+                });
+            }
         }
 
         super.update();
@@ -201,6 +215,14 @@ class Character extends GameObject {
 
         if (this.game.renderHitBox)
             this.renderHitBox();
+    }
+
+    renderInfo() {
+        this.renderSprite(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
+        this.game.ctx.font = '30px consolas';
+        this.game.ctx.fillStyle = "white";
+        this.game.ctx.textAlign = "left";
+        this.game.ctx.fillText(this.coins, 65, 45);
     }
 
 }

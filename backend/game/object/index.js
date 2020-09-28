@@ -2,6 +2,7 @@ try {
     collision = require("../collision").collision;
     SHAPE_RECT = require("../collision").SHAPE_RECT;
     CLASS_OBJECT = require('../index').CLASS_OBJECT;
+    CLASS_MOB = require('../index').CLASS_MOB;
 } catch (err) { }
 
 class GameObject {
@@ -21,6 +22,8 @@ class GameObject {
             xMovement: 0,
             yMovement: 0,
             onGround: false,
+            despawnTime: 0,
+            despawnTimer: 0,
 
             ...initInfo
         });
@@ -39,6 +42,8 @@ class GameObject {
         this.xMovement = info.xMovement;
         this.yMovement = info.yMovement;
         this.onGround = info.onGround;
+        this.despawnTime = info.despawnTime;
+        this.despawnTimer = info.despawnTimer;
     }
 
     setData(data) {
@@ -55,6 +60,8 @@ class GameObject {
         this.xMovement = data[i++];
         this.yMovement = data[i++];
         this.onGround = data[i++];
+        this.despawnTime = data[i++];
+        this.despawnTimer = data[i++];
         return i;
     }
 
@@ -72,6 +79,8 @@ class GameObject {
             this.xMovement,
             this.yMovement,
             this.onGround,
+            this.despawnTime,
+            this.despawnTimer,
         ];
     }
 
@@ -82,7 +91,7 @@ class GameObject {
         };
     }
 
-    update() {
+    update(deltaTime) {
         const xVelocity = this.xVelocity + this.xMovement;
         if (Math.abs(xVelocity) >= 0.1) {
             this.x += xVelocity;
@@ -119,7 +128,7 @@ class GameObject {
         if (this.game.deadline && this.y > this.game.deadline) this.removed = true;
 
         for (const obj of this.game.objects) {
-            if (obj.shape === SHAPE_RECT && collision(obj, this)) {
+            if (obj.classType === CLASS_MOB && collision(obj, this)) {
                 const center = this.getCenter();
                 const objCenter = obj.getCenter();
                 const diffX = center.x - objCenter.x;
@@ -127,6 +136,12 @@ class GameObject {
                 if (diffX !== 0) this.xVelocity += 0.1 * diffX / Math.abs(diffX);
                 if (diffY !== 0) this.yVelocity += 0.1 * diffY / Math.abs(diffY);
             }
+        }
+
+        if (this.despawnTime > 0) {
+            this.despawnTimer += deltaTime;
+            if (this.despawnTimer > this.despawnTime)
+                this.removed = true;
         }
     }
 

@@ -4,6 +4,7 @@ try {
     Character = require('./object/character');
     Bullet = require('./object/bullet');
     Mob = require('./object/mob');
+    Coin = require('./object/coin');
 
     Particle = require('./particle');
     Sparks = require('./particle/sparks');
@@ -16,6 +17,7 @@ try {
     CLASS_CHARACTER = require('./classes').CLASS_CHARACTER;
     CLASS_BULLET = require('./classes').CLASS_BULLET;
     CLASS_MOB = require('./classes').CLASS_MOB;
+    CLASS_COIN = require('./classes').CLASS_COIN;
 
     CLASS_PARTICLE = require('./classes').CLASS_PARTICLE;
     CLASS_SPARKS = require('./classes').CLASS_SPARKS;
@@ -38,9 +40,11 @@ class Game {
         this.objects = [];
         this.particles = [];
         this.blocks = [];
+        this.decorationBlocks = [];
         this.spawnList = [];
 
         this.updatedBlocks = false;
+        this.updatedDecorationBlock = false;
         this.updatedMapData = false;
 
         this.playerSpawnPoints = [];
@@ -69,6 +73,7 @@ class Game {
                 case CLASS_CHARACTER: return new Character(this, info);
                 case CLASS_BULLET: return new Bullet(this, info);
                 case CLASS_MOB: return new Mob(this, info);
+                case CLASS_COIN: return new Coin(this, info);
                 default: return new GameObject(this, info);
             }
         })();
@@ -85,6 +90,19 @@ class Game {
             return object;
         }
         this.objects.push(object);
+        return object;
+    }
+
+    spawnDecorationBlock(classType, info = {}) {
+        const object = (() => {
+            info.classType = classType;
+            switch (classType) {
+                case CLASS_BLOCK: return new Block(this, info);
+                default: return new GameObject(this, info);
+            }
+        })();
+        this.decorationBlocks.push(object);
+        this.updatedDecorationBlock = true;
         return object;
     }
 
@@ -127,6 +145,13 @@ class Game {
             this.blocks.length = 0;
             data.blocks.forEach(data => {
                 const block = this.spawnObject(data[0], {}, false);
+                block.setData(data);
+            });
+        }
+        if (data.decorationBlocks) {
+            this.decorationBlocks.length = 0;
+            data.decorationBlocks.forEach(data => {
+                const block = this.spawnDecorationBlock(data[0], {});
                 block.setData(data);
             });
         }
@@ -175,9 +200,11 @@ class Game {
 
         this.ctx.imageSmoothingEnabled = false;
         this.blocks.forEach(b => b.render());
+        this.decorationBlocks.forEach(b => b.render());
         this.objects.forEach(o => {
             o.render();
             if (this.cameraFocusId && o.objectId === this.cameraFocusId && o.weapon) {
+                o.renderInfo();
                 o.weapon.renderInfo();
             }
         });

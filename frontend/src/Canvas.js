@@ -19,7 +19,8 @@ const Canvas = () => {
             `${REACT_APP_GAME_SERVER}/resource/sprite1.png`,
             `${REACT_APP_GAME_SERVER}/resource/sprite2.png`,
             `${REACT_APP_GAME_SERVER}/resource/sprite3.png`,
-            `${REACT_APP_GAME_SERVER}/resource/ammo-icon.png`
+            `${REACT_APP_GAME_SERVER}/resource/ammo-icon.png`,
+            `${REACT_APP_GAME_SERVER}/resource/coin-icon.png`,
         ]);
     }, [canvas]);
 

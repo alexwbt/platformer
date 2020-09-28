@@ -26,15 +26,21 @@ setInterval(() => {
 
 setInterval(() => {
     game.mobSpawnPoints.forEach(point => {
-        if ((() => {
-            for (const obj of game.objects)
-                if (obj.classType === CLASS_CHARACTER) {
-                    const dis = Math.pow(point.x - obj.x, 2) + Math.pow(point.y - obj.y, 2);
-                    if (dis < 40000) return true;
+        let playerCount = 0;
+        for (const obj of game.objects)
+            if (obj.classType === CLASS_CHARACTER) {
+                const dis = Math.pow(point.x - obj.x, 2) + Math.pow(point.y - obj.y, 2);
+                if (dis < 100) {
+                    game.mobSpawnPoints = [];
+                    game.particles = [];
                 }
-            return false;
-        })() && Math.random() < 1) {
+                if (dis < 250000) playerCount++;
+            }
+        if (playerCount > 0) {
             game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
+            for (let i = 0; i < playerCount; i++)
+                if (Math.random() < 0.5)
+                    game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
         }
     });
 }, 3000);
@@ -69,6 +75,7 @@ io.on('connection', socket => {
     socket.emit('player-id', client.player.objectId);
     socket.emit('game-data', {
         blocks: game.blocks.map(b => b.getData()),
+        decorationBlocks: game.decorationBlocks.map(b => b.getData()),
         mapData: game.mapData,
         bounds: game.bounds,
     });
@@ -77,8 +84,10 @@ io.on('connection', socket => {
     socket.on('player-aim', aim => client.player.aimDir = aim);
     socket.on('player-fire', fire => client.player.weapon.firing = fire);
     socket.on('player-reload', () => client.player.weapon.reload());
-    socket.on('player-name', name => client.player.name = name);
+    socket.on('player-name', name => client.player.name = String(name).slice(-15));
     socket.on('player-char', char => client.player.character = char);
+    socket.on('player-buy-weapon', weapon => client.player.weapon.buy(weapon));
+    socket.on('player-buy-ammo', weapon => client.player.weapon.buyAmmo(weapon));
 
     socket.on('disconnect', () => {
         client.player.removed = true;

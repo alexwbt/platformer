@@ -4,8 +4,9 @@ try {
 } catch (err) { }
 
 const weaponInfo = [
-    { // pistol
-        gripX: 13,
+    {
+        name: 'Pistol',
+        gripX: 12,
         gripY: 9,
         fireX: 17,
         fireY: 6,
@@ -14,14 +15,17 @@ const weaponInfo = [
         scale: 0.5,
         damage: 0.3,
         accuracy: 0.2,
-        speed: 6,
-        travelTime: 0.25,
+        speed: 8,
+        travelTime: 0.2,
         magSize: 12,
         reloadTime: 1,
         projectile: 1,
         carry: 120,
+        price: 0,
+        ammoPrice: 10,
     },
-    { // submachine gun
+    {
+        name: 'Submachine Gun',
         gripX: 13,
         gripY: 9,
         fireX: 28,
@@ -37,8 +41,11 @@ const weaponInfo = [
         reloadTime: 1,
         projectile: 1,
         carry: 210,
+        price: 30,
+        ammoPrice: 20,
     },
-    { // machine gun
+    {
+        name: 'Machine Gun',
         gripX: 13,
         gripY: 9,
         fireX: 35,
@@ -54,8 +61,11 @@ const weaponInfo = [
         reloadTime: 6,
         projectile: 1,
         carry: 200,
+        price: 80,
+        ammoPrice: 50,
     },
-    { // double barrow shotgun
+    {
+        name: 'Double Barrow Shotgun',
         gripX: 13,
         gripY: 9,
         fireX: 28,
@@ -71,8 +81,11 @@ const weaponInfo = [
         reloadTime: 1,
         projectile: 5,
         carry: 50,
+        price: 80,
+        ammoPrice: 20,
     },
-    { // DMR
+    {
+        name: 'DMR',
         gripX: 13,
         gripY: 9,
         fireX: 36,
@@ -88,8 +101,11 @@ const weaponInfo = [
         reloadTime: 2,
         projectile: 1,
         carry: 100,
+        price: 90,
+        ammoPrice: 25,
     },
-    { // sniper rifle
+    {
+        name: 'Sniper Rifle',
         gripX: 13,
         gripY: 9,
         fireX: 40,
@@ -105,6 +121,8 @@ const weaponInfo = [
         reloadTime: 3,
         projectile: 1,
         carry: 99,
+        price: 100,
+        ammoPrice: 30,
     },
 ];
 
@@ -164,6 +182,24 @@ class Weapon {
             this.reloadTimer,
             this.carryingAmmo,
         ];
+    }
+
+    buy(weapon) {
+        const info = weaponInfo[weapon];
+        if (info && this.owner.weaponType !== weapon && this.owner.coins >= info.price) {
+            this.owner.coins -= info.price;
+            this.owner.weaponType = weapon;
+            this.ammo = info.magSize;
+            this.carryingAmmo = info.carry;
+        }
+    }
+
+    buyAmmo(weapon) {
+        const info = weaponInfo[weapon];
+        if (info && this.owner.weaponType === weapon && this.owner.coins >= info.ammoPrice) {
+            this.owner.coins -= info.ammoPrice;
+            this.carryingAmmo += info.carry;
+        }
     }
 
     fire() {

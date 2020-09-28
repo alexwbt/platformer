@@ -5,6 +5,7 @@ const Container = styled.div`
     border: 1px solid white;
     min-width: 200px;
     text-align: center;
+    max-width: 500px;
 `;
 
 const CharCanvas = styled.canvas`

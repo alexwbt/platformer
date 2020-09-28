@@ -1,17 +1,14 @@
 
 const game = new Game();
 window.game = game;
-
-let player = false;
-let playerId = 0;
-// player = game.spawnObject(CLASS_CHARACTER);
-// game.spawnObject(CLASS_BLOCK, { y: 55, x: 100, width: 200 });
-// game.spawnObject(CLASS_BLOCK, { y: 100, width: 400 });
-// game.spawnObject(CLASS_BLOCK, { y: 0, height: 101 });
-// game.cameraFocusId = player.objectId;
+window.weaponInfo = weaponInfo;
+window.stopListening = true;
 
 const socket = io(SERVER);
 window.socket = socket;
+
+let player = false;
+let playerId = 0;
 
 socket.on('connect', () => {
     console.log('socket connected');
@@ -39,7 +36,7 @@ setInterval(() => {
 }, 1000 / 60);
 
 window.addEventListener('keydown', e => {
-    if (player) {
+    if (player && !window.stopListening) {
         switch (e.key.toLowerCase()) {
             case 'w': player.controls[0] = true; break;
             case 'a': player.controls[1] = true; break;
@@ -75,7 +72,7 @@ window.addEventListener('mousemove', e => {
 });
 
 window.addEventListener('mousedown', e => {
-    if (player) {
+    if (player && !window.stopListening) {
         switch (e.button) {
             case 0:
                 player.weapon.firing = true;
@@ -102,7 +99,8 @@ window.addEventListener('contextmenu', e => {
 });
 
 window.addEventListener('mousewheel', e => {
-    game.scale = Math.max(1, game.scale - e.deltaY / 100);
+    if (!window.stopListening)
+        game.scale = Math.max(1, game.scale - e.deltaY / 100);
 });
 
 window.onblur = () => {
