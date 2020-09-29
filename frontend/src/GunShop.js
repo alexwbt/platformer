@@ -99,12 +99,12 @@ const HealItem = ({ game, socket }) => {
 
     useEffect(() => {
         if (display.current) {
-            display.current.width = 15 * 5;
-            display.current.height = 15 * 5;
+            display.current.width = 15 * 7;
+            display.current.height = 15 * 7;
             const ctx = display.current.getContext('2d');
             ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(game.sprites[5], 0, 0, 15, 15,
-                0, 0, display.current.width, display.current.height);
+            ctx.drawImage(game.sprites[5], 0, 0, 11, 11,
+                10, 10, display.current.width - 20, display.current.height - 20);
         }
     }, [display, game]);
 

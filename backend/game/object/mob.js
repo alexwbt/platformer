@@ -43,7 +43,7 @@ class Mob extends Character {
     hit(bullet, coll) {
         if (this.health <= 0) return;
         this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
-        this.health = Math.max(0, this.health - bullet.damage * 1.5);
+        this.health = Math.max(0, this.health - bullet.damage * (1.5 + Math.random() * 0.5));
         if (this.health === 0) {
             const coins = Math.ceil(Math.random() * 4);
             for (let i = 0; i < coins; i++) {

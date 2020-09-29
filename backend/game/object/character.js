@@ -267,7 +267,7 @@ class Character extends GameObject {
         this.renderSprite(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
         this.game.ctx.fillText(this.coins, 65, 45);
 
-        this.renderSprite(this.game.sprites[5], 0, 0, 15, 15, 20, 60, 32, 32);
+        this.renderSprite(this.game.sprites[5], 0, 0, 11, 11, 20, 60, 32, 32);
         this.game.ctx.fillText(this.heals, 65, 85);
     }
 

@@ -85,7 +85,7 @@ class Bullet extends GameObject {
         }
 
         for (const obj of this.game.objects) {
-            if ((this.game.pvp && obj.classType === CLASS_CHARACTER) || obj.classType === CLASS_MOB) {
+            if (obj.classType === CLASS_CHARACTER || obj.classType === CLASS_MOB) {
                 const coll = collision(obj, this);
                 if (coll) {
                     obj.hit(this, coll);
