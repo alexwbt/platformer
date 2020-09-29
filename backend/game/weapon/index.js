@@ -125,7 +125,6 @@ const weaponInfo = [
         ammoPrice: 30,
     },
 ];
-
 class Weapon {
 
     constructor(owner, initInfo) {
@@ -328,4 +327,8 @@ class Weapon {
 
 try {
     module.exports = Weapon;
+} catch (err) { }
+
+try {
+    window.weaponInfo = weaponInfo;
 } catch (err) { }

@@ -14,7 +14,7 @@ class Mob extends Character {
         super(game, {
             character: 14,
             weaponType: -1,
-            targetRange: 500,
+            targetRange: 150,
             noTargetCounter: 0,
             ...initInfo,
         });
@@ -41,10 +41,20 @@ class Mob extends Character {
     }
 
     hit(bullet, coll) {
+        if (this.health <= 0) return;
         this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
         this.health = Math.max(0, this.health - bullet.damage * 1.5);
-        if (this.health === 0)
-            this.game.spawnObject(CLASS_COIN, { x: this.x, y: this.y });
+        if (this.health === 0) {
+            const coins = Math.ceil(Math.random() * 4);
+            for (let i = 0; i < coins; i++) {
+                this.game.spawnObject(CLASS_COIN, {
+                    x: this.x,
+                    y: this.y,
+                    xVelocity: (Math.random() - 0.5) * 2,
+                    yVelocity: Math.random() - 0.5
+                });
+            }
+        }
         for (const pt of coll)
             if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
     }

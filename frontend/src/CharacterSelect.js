@@ -18,7 +18,7 @@ const CharCanvas = styled.canvas`
     }
 `;
 
-const CharacterButton = ({ index, select, selected, image }) => {
+const CharacterButton = ({ index, select, selected, image, socket }) => {
     const canvas = useRef();
 
     useEffect(() => {
@@ -36,13 +36,13 @@ const CharacterButton = ({ index, select, selected, image }) => {
 
     const onClick = useCallback(() => {
         select(index);
-        window.socket.emit('player-char', index);
-    }, [index, select]);
+        socket.emit('player-char', index);
+    }, [index, select, socket]);
 
     return <CharCanvas ref={canvas} onClick={onClick} selected={selected} />
 };
 
-const CharacterSelect = () => {
+const CharacterSelect = ({ socket }) => {
     const [selection, setSelection] = useState(0);
     const [image, setImage] = useState(false);
 
@@ -62,6 +62,7 @@ const CharacterSelect = () => {
                 selected={i === selection}
                 select={setSelection}
                 image={image}
+                socket={socket}
             />)
         }
     </Container>;

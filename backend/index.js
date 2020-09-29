@@ -30,11 +30,7 @@ setInterval(() => {
         for (const obj of game.objects)
             if (obj.classType === CLASS_CHARACTER) {
                 const dis = Math.pow(point.x - obj.x, 2) + Math.pow(point.y - obj.y, 2);
-                if (dis < 100) {
-                    game.mobSpawnPoints = [];
-                    game.particles = [];
-                }
-                if (dis < 250000) playerCount++;
+                if (dis < 40000) playerCount++;
             }
         if (playerCount > 0) {
             game.spawnObject(CLASS_MOB, { x: point.x, y: point.y });
@@ -88,6 +84,7 @@ io.on('connection', socket => {
     socket.on('player-char', char => client.player.character = char);
     socket.on('player-buy-weapon', weapon => client.player.weapon.buy(weapon));
     socket.on('player-buy-ammo', weapon => client.player.weapon.buyAmmo(weapon));
+    socket.on('player-buy-heal', () => client.player.buyHeal());
 
     socket.on('disconnect', () => {
         client.player.removed = true;

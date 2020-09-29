@@ -11,18 +11,21 @@ const FixedCanvas = styled.canvas`
     top: 0;
 `;
 
-const Canvas = () => {
+const Canvas = ({ game }) => {
     const canvas = useRef();
 
     useEffect(() => {
-        window.game.setCanvas(canvas.current, [
-            `${REACT_APP_GAME_SERVER}/resource/sprite1.png`,
-            `${REACT_APP_GAME_SERVER}/resource/sprite2.png`,
-            `${REACT_APP_GAME_SERVER}/resource/sprite3.png`,
-            `${REACT_APP_GAME_SERVER}/resource/ammo-icon.png`,
-            `${REACT_APP_GAME_SERVER}/resource/coin-icon.png`,
-        ]);
-    }, [canvas]);
+        if (canvas.current) {
+            game.setCanvas(canvas.current, [
+                `${REACT_APP_GAME_SERVER}/resource/sprite1.png`,
+                `${REACT_APP_GAME_SERVER}/resource/sprite2.png`,
+                `${REACT_APP_GAME_SERVER}/resource/sprite3.png`,
+                `${REACT_APP_GAME_SERVER}/resource/ammo-icon.png`,
+                `${REACT_APP_GAME_SERVER}/resource/coin-icon.png`,
+                `${REACT_APP_GAME_SERVER}/resource/heal-icon.png`,
+            ]);
+        }
+    }, [canvas, game]);
 
     return <FixedCanvas ref={canvas} />;
 };

@@ -250,8 +250,8 @@ class Game {
                 shape: SHAPE_RECT,
                 x: 0,
                 y: 0,
-                width: game.canvas.width,
-                height: game.canvas.height
+                width: this.canvas.width,
+                height: this.canvas.height
             })
         };
     }
@@ -260,4 +260,8 @@ class Game {
 
 try {
     module.exports = Game;
+} catch (e) { }
+
+try {
+    window.Game = Game;
 } catch (e) { }

@@ -1,6 +1,6 @@
 import React, { useCallback, useRef, useState } from 'react';
 import styled from 'styled-components';
-import CharacterSelect from './CharacterSelet';
+import CharacterSelect from './CharacterSelect';
 import { useInput } from './hooks/Input';
 
 const Container = styled.div`
@@ -62,7 +62,7 @@ const SubmitButton = styled.div`
     }
 `;
 
-const InitialModal = () => {
+const InitialModal = ({ socket }) => {
     const [name, setName] = useInput('');
     const [show, setShow] = useState(true);
     const ref = useRef();
@@ -70,11 +70,11 @@ const InitialModal = () => {
     const onClose = useCallback(() => {
         const trimmedName = name.trim();
         if (name) {
-            window.socket.emit('player-name', trimmedName);
+            socket.emit('player-name', trimmedName);
             setShow(false);
             window.stopListening = false;
         } else setName({ target: { value: null } });
-    }, [name, setName]);
+    }, [name, setName, socket]);
 
     return show && <Container ref={ref}>
         <Section>
@@ -106,12 +106,16 @@ const InitialModal = () => {
                     <span>B</span>
                     <span>Shop</span>
                 </div>
+                <div>
+                    <span>H (Hold)</span>
+                    <span>Heal</span>
+                </div>
             </Controls>
             <SubmitButton onClick={onClose}>Enter</SubmitButton>
         </Section>
         <Section>
             <Title>Select Character</Title>
-            <CharacterSelect />
+            <CharacterSelect socket={socket} />
         </Section>
     </Container>;
 };

@@ -6,8 +6,8 @@ const Container = styled.div`
     top: 50vh;
     left: 50vw;
     transform: translate(-50%, -50%);
-    width: 50vw;
-    height: 50vw;
+    width: 600px;
+    height: 50vh;
     padding: 20px;
     background-color: #333;
     color: white;
@@ -23,7 +23,7 @@ const Item = styled.div`
 `;
 
 const Display = styled.canvas`
-    display: inline-block;
+    display: block;
 `;
 
 const Right = styled.div`
@@ -38,6 +38,7 @@ const Name = styled.div`
 `;
 
 const Button = styled.div`
+    display: inline-block;
     font-size: 18px;
     padding: 5px 10px;
     border-radius: 5px;
@@ -48,36 +49,43 @@ const Button = styled.div`
     :hover {
         background-color: #898;
     }
+    :last-child {
+        float: right;
+        background-color: #565;
+        :hover {
+            background-color: #898;
+        }
+    }
 `;
 
-const ItemComp = ({ item, index }) => {
+const GunItem = ({ item, index, game, socket }) => {
     const display = useRef();
 
     useEffect(() => {
         if (display.current) {
-            display.current.width = 330;
-            display.current.height = 170;
+            display.current.width = 33 * 5;
+            display.current.height = 17 * 5;
             const ctx = display.current.getContext('2d');
             const sWidth = 33;
             const sHeight = 17;
             const sx = (index % 4) * sWidth;
             const sy = Math.floor(index / 4) * sHeight;
             ctx.imageSmoothingEnabled = false;
-            ctx.drawImage(window.game.sprites[2], sx, sy, sWidth, sHeight,
+            ctx.drawImage(game.sprites[2], sx, sy, sWidth, sHeight,
                 0, 0, display.current.width, display.current.height);
         }
-    }, [display, index]);
+    }, [display, index, game]);
 
     const buyWeapon = useCallback(() => {
-        window.socket.emit('player-buy-weapon', index);
-    }, [index]);
+        socket.emit('player-buy-weapon', index);
+    }, [index, socket]);
 
     const buyAmmo = useCallback(() => {
-        window.socket.emit('player-buy-ammo', index);
-    }, [index]);
+        socket.emit('player-buy-ammo', index);
+    }, [index, socket]);
 
     return <Item>
-        <Display ref={display}></Display>
+        <div><Display ref={display}></Display></div>
         <Right>
             <Name>{item.name}</Name>
             <Button onClick={buyWeapon}>Buy(${item.price})</Button>
@@ -86,7 +94,34 @@ const ItemComp = ({ item, index }) => {
     </Item>;
 };
 
-const GunShop = () => {
+const HealItem = ({ game, socket }) => {
+    const display = useRef();
+
+    useEffect(() => {
+        if (display.current) {
+            display.current.width = 15 * 5;
+            display.current.height = 15 * 5;
+            const ctx = display.current.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            ctx.drawImage(game.sprites[5], 0, 0, 15, 15,
+                0, 0, display.current.width, display.current.height);
+        }
+    }, [display, game]);
+
+    const butHeal = useCallback(() => {
+        socket.emit('player-buy-heal');
+    }, [socket]);
+
+    return <Item>
+        <div><Display ref={display}></Display></div>
+        <Right>
+            <Name>Healing Potion</Name>
+            <Button onClick={butHeal}>Buy($10)</Button>
+        </Right>
+    </Item>;
+};
+
+const GunShop = ({ game, socket }) => {
     const [show, setShow] = useState(true);
     const ref = useRef();
 
@@ -105,7 +140,8 @@ const GunShop = () => {
     }, [ref]);
 
     return show && <Container ref={ref}>
-        {window.weaponInfo.map((info, i) => <ItemComp item={info} key={i} index={i} />)}
+        <HealItem game={game} socket={socket} />
+        {window.weaponInfo.map((info, i) => <GunItem item={info} key={i} index={i} game={game} socket={socket} />)}
     </Container>;
 };
 

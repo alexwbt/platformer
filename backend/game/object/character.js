@@ -25,6 +25,9 @@ class Character extends GameObject {
             jump: 0.2,
             jumpHold: 0,
             coins: 0,
+            heals: 0,
+            healTimer: 0,
+            healTime: 1,
 
             // weapon
             aimDir: 0,
@@ -47,6 +50,9 @@ class Character extends GameObject {
         this.jump = info.jump;
         this.jumpHold = info.jumpHold;
         this.coins = info.coins;
+        this.heals = info.heals;
+        this.healTimer = info.healTimer;
+        this.healTime = info.healTime;
 
         // weapon
         this.aimDir = info.aimDir;
@@ -69,6 +75,9 @@ class Character extends GameObject {
         this.jump = data[i++];
         this.jumpHold = data[i++];
         this.coins = data[i++];
+        this.heals = data[i++];
+        this.healTimer = data[i++];
+        this.healTime = data[i++];
 
         // weapon
         this.aimDir = data[i++];
@@ -95,6 +104,9 @@ class Character extends GameObject {
             this.jump,
             this.jumpHold,
             this.coins,
+            this.heals,
+            this.healTimer,
+            this.healTime,
 
             // weapon
             this.aimDir,
@@ -104,12 +116,20 @@ class Character extends GameObject {
     }
 
     hit(bullet, coll) {
+        if (this.health <= 0) return;
         if (bullet) {
             this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
             this.health = Math.max(0, this.health - bullet.damage);
             for (const pt of coll)
                 if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
         } else this.game.spawnParticle(CLASS_SPARKS, { ...this.getCenter(), colorFunction: 2, amount: 30 });
+    }
+
+    buyHeal() {
+        if (this.coins > 10) {
+            this.coins -= 10;
+            this.heals++;
+        }
     }
 
     update(deltaTime) {
@@ -122,12 +142,12 @@ class Character extends GameObject {
             this.jumpHold += deltaTime;
         else if (!this.onGround) this.jumpHold = -1;
 
-        if ((this.controls[0] || this.controls[4]) && this.jumpHold > 0 && this.jumpHold <= this.jump)
+        if ((this.controls[0] || this.controls[4]) && !this.controls[5] && this.jumpHold > 0 && this.jumpHold <= this.jump)
             // this.yVelocity = -4 * Math.sin((this.jumpHold / this.jump) * Math.PI / 2); // ease out sign
             this.yVelocity = -4 * (1 - Math.pow(1 - (this.jumpHold / this.jump), 3)); // ease out cubic
 
         // walk
-        if (this.controls[1]) {
+        if (this.controls[1] && !this.controls[5]) {
             this.xMovement = -1;
             this.lookingLeft = true;
             this.movingLeft = true;
@@ -135,7 +155,7 @@ class Character extends GameObject {
             this.movingLeft = false;
             this.xMovement = 0;
         }
-        if (this.controls[3]) {
+        if (this.controls[3] && !this.controls[5]) {
             this.xMovement = 1;
             this.lookingLeft = false;
             this.movingRight = true;
@@ -143,6 +163,16 @@ class Character extends GameObject {
             this.movingRight = false;
             this.xMovement = 0;
         }
+
+        // heal
+        if (this.controls[5] && this.heals >= 1 && this.health < 1) {
+            this.healTimer += deltaTime;
+            if (this.healTimer >= this.healTime) {
+                this.heals--;
+                this.health = Math.min(1, this.health + 0.35);
+                this.healTimer = 0;
+            }
+        } else this.healTimer = 0;
 
         if (this.movingLeft || this.movingRight)
             this.movedTime += deltaTime;
@@ -213,16 +243,32 @@ class Character extends GameObject {
         this.game.ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
         this.game.ctx.fillRect(x, y - 3 * this.game.scale, width * this.health, 1.5 * this.game.scale);
 
+        if (this.healTimer > 0) {
+            this.game.ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+            this.game.ctx.beginPath();
+            this.game.ctx.arc(this.game.canvas.width / 2, this.game.canvas.height / 2, 50, 0, Math.PI * 2);
+            this.game.ctx.fill();
+            this.game.ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
+            this.game.ctx.beginPath();
+            this.game.ctx.moveTo(this.game.canvas.width / 2, this.game.canvas.height / 2);
+            this.game.ctx.arc(this.game.canvas.width / 2, this.game.canvas.height / 2, 45, 0, Math.PI * 2 * this.healTimer / this.healTime);
+            this.game.ctx.fill();
+        }
+
         if (this.game.renderHitBox)
             this.renderHitBox();
     }
 
     renderInfo() {
-        this.renderSprite(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
         this.game.ctx.font = '30px consolas';
         this.game.ctx.fillStyle = "white";
         this.game.ctx.textAlign = "left";
+
+        this.renderSprite(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
         this.game.ctx.fillText(this.coins, 65, 45);
+
+        this.renderSprite(this.game.sprites[5], 0, 0, 15, 15, 20, 60, 32, 32);
+        this.game.ctx.fillText(this.heals, 65, 85);
     }
 
 }
