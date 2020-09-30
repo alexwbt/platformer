@@ -16,6 +16,7 @@ class Mob extends Character {
             weaponType: -1,
             targetRange: 150,
             noTargetCounter: 0,
+            movementSpeed: 0.5,
             ...initInfo,
         });
 
@@ -85,10 +86,7 @@ class Mob extends Character {
 
         if (target) {
             this.noTargetCounter = 0;
-            // const blockSize = 10;
             const targetCenter = target.getCenter();
-            // const targetX = Math.floor(targetCenter.x / blockSize) * blockSize;
-            // const targetY = Math.floor(targetCenter.y / blockSize) * blockSize;
             const center = this.getCenter();
             this.controls[1] = center.x > targetCenter.x;
             this.controls[3] = center.x < targetCenter.x;

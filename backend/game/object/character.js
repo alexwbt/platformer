@@ -21,6 +21,7 @@ class Character extends GameObject {
             lookingLeft: false,
             movingLeft: false,
             movingRight: false,
+            movementSpeed: 1,
             controls: [],
             angle: 0,
             health: 1,
@@ -49,6 +50,7 @@ class Character extends GameObject {
         this.lookingLeft = info.lookingLeft;
         this.movingLeft = info.movingLeft;
         this.movingRight = info.movingRight;
+        this.movementSpeed = info.movementSpeed;
         this.controls = info.controls;
         this.angle = info.angle;
         this.health = info.health;
@@ -77,6 +79,7 @@ class Character extends GameObject {
         this.lookingLeft = data[i++];
         this.movingLeft = data[i++];
         this.movingRight = data[i++];
+        this.movementSpeed = data[i++];
         this.controls = data[i++];
         this.angle = data[i++];
         this.health = data[i++];
@@ -109,6 +112,7 @@ class Character extends GameObject {
             this.lookingLeft,
             this.movingLeft,
             this.movingRight,
+            this.movementSpeed,
             this.controls,
             this.angle,
             this.health,
@@ -196,7 +200,7 @@ class Character extends GameObject {
 
         // walk
         if (this.controls[1] && !this.controls[5]) {
-            this.xMovement = -1;
+            this.xMovement = -this.movementSpeed;
             this.lookingLeft = true;
             this.movingLeft = true;
         } else if (this.movingLeft) {
@@ -204,7 +208,7 @@ class Character extends GameObject {
             this.xMovement = 0;
         }
         if (this.controls[3] && !this.controls[5]) {
-            this.xMovement = 1;
+            this.xMovement = this.movementSpeed;
             this.lookingLeft = false;
             this.movingRight = true;
         } else if (this.movingRight) {

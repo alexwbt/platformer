@@ -25,6 +25,7 @@ const Input = styled.input`
     font-size: 20px;
     border: 1px solid black;
     text-align: center;
+    width: calc(100% - 22px);
 `;
 
 const Title = styled.div`

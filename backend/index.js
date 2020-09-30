@@ -45,7 +45,8 @@ setInterval(() => {
 setInterval(() => {
     for (const event of game.events) {
         if (event.bullet) {
-            const killer = game.objects.find(o => o.objectId === event.bullet.ownerId);
+            let killer = game.objects.find(o => o.objectId === event.bullet.ownerId);
+            if (!killer) killer = clients.map(c => c.player).find(p => p.objectId === event.bullet.ownerId);
             if (killer) {
                 if (event.diedObj.name)
                     io.emit('game-alert', `${event.diedObj.name} was killed by ${killer.name}`);
@@ -76,7 +77,7 @@ setInterval(() => {
     game.events.length = 0;
 
     if (!gameStarted) {
-        if (clients.length >= 3) {
+        if (bombCountdown === 300 && clients.length >= 3) {
             gameStarted = true;
             const bombClient = clients[Math.floor(Math.random() * clients.length)];
             bombClient.player.hasBomb = true;
@@ -89,7 +90,9 @@ setInterval(() => {
 
         if (bombCountdown <= 0 || clients.length <= 1) {
             gameStarted = false;
-            bombCountdown = 300;
+            setTimeout(() => {
+                bombCountdown = 300;
+            }, 5000);
             for (const client of clients) {
                 if (client.player.hasBomb) {
                     client.player.hasBomb = false;
@@ -126,8 +129,8 @@ let bombCountdown = 300;
 const clients = [];
 const addresses = [];
 io.on('connection', socket => {
-    if (addresses.find(address => address === socket.handshake.address))
-        return;
+    // if (addresses.find(address => address === socket.handshake.address))
+    //     return;
     addresses.push(socket.handshake.address);
 
     const client = {
