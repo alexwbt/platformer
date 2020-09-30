@@ -51,10 +51,6 @@ class Particle {
 
     }
 
-    renderSprite(sprite, sx, sy, sWidth, sHeight, x, y, width, height) {
-        this.game.ctx.drawImage(sprite, sx, sy, sWidth, sHeight, x, y, width, height);
-    }
-
 }
 
 try {

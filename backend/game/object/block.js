@@ -42,7 +42,7 @@ class Block extends GameObject {
         const spriteX = ((this.blockType - 1) % 8) * spriteSize;
         const spriteY = Math.floor((this.blockType - 1) / 8) * spriteSize;
         
-        super.renderSprite(this.game.sprites[0], spriteX, spriteY, spriteSize, spriteSize, x, y, width, height);
+        this.game.ctx.drawImage(this.game.sprites[0], spriteX, spriteY, spriteSize, spriteSize, x, y, width, height);
     }
 
 }

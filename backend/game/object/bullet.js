@@ -14,6 +14,7 @@ class Bullet extends GameObject {
         super(game, {
             width: 1,
             height: 1,
+            ownerId: 0,
 
             dir: 0,
             speed: 10,
@@ -29,6 +30,7 @@ class Bullet extends GameObject {
 
     setInfo(info) {
         super.setInfo(info);
+        this.ownerId = info.ownerId;
         this.dir = info.dir;
         this.speed = info.speed;
         this.travelTime = info.travelTime;
@@ -41,6 +43,7 @@ class Bullet extends GameObject {
 
     setData(data) {
         let i = super.setData(data);
+        this.ownerId = data[i++];
         this.dir = data[i++];
         this.speed = data[i++];
         this.travelTime = data[i++];
@@ -54,6 +57,7 @@ class Bullet extends GameObject {
 
     getData() {
         return super.getData().concat([
+            this.ownerId,
             this.dir,
             this.speed,
             this.travelTime,

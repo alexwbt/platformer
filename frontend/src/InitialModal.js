@@ -50,6 +50,12 @@ const Controls = styled.div`
     }
 `;
 
+const Content = styled.div`
+    border: 1px solid white;
+    padding: 10px;
+    font-size: 20px;
+`;
+
 const SubmitButton = styled.div`
     padding: 5px;
     margin-top: 10px;
@@ -111,6 +117,8 @@ const InitialModal = ({ socket }) => {
                     <span>Heal</span>
                 </div>
             </Controls>
+            <Title>Goal</Title>
+            <Content>Hold the bomb until it explodes.</Content>
             <SubmitButton onClick={onClose}>Enter</SubmitButton>
         </Section>
         <Section>

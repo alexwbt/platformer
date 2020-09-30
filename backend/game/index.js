@@ -5,6 +5,7 @@ try {
     Bullet = require('./object/bullet');
     Mob = require('./object/mob');
     Coin = require('./object/coin');
+    Heal = require('./object/heal');
 
     Particle = require('./particle');
     Sparks = require('./particle/sparks');
@@ -18,6 +19,7 @@ try {
     CLASS_BULLET = require('./classes').CLASS_BULLET;
     CLASS_MOB = require('./classes').CLASS_MOB;
     CLASS_COIN = require('./classes').CLASS_COIN;
+    CLASS_HEAL = require('./classes').CLASS_HEAL;
 
     CLASS_PARTICLE = require('./classes').CLASS_PARTICLE;
     CLASS_SPARKS = require('./classes').CLASS_SPARKS;
@@ -51,6 +53,9 @@ class Game {
         this.mobSpawnPoints = [];
         this.deadline = 0;
         this.mapData = false;
+
+        this.events = [];
+        this.saveEvents = false;
     }
 
     setCanvas(canvas, spriteSources) {
@@ -74,6 +79,7 @@ class Game {
                 case CLASS_BULLET: return new Bullet(this, info);
                 case CLASS_MOB: return new Mob(this, info);
                 case CLASS_COIN: return new Coin(this, info);
+                case CLASS_HEAL: return new Heal(this, info);
                 default: return new GameObject(this, info);
             }
         })();
@@ -164,6 +170,9 @@ class Game {
     }
 
     update(deltaTime) {
+        if (!this.saveEvents)
+            this.events = [];
+
         this.particles = this.particles.filter(p => {
             p.update(deltaTime);
             return !p.removed;
@@ -209,6 +218,13 @@ class Game {
             }
         });
         this.particles.forEach(p => p.render());
+
+        if (this.bombCountdown) {
+            this.ctx.font = '20px consolas';
+            this.ctx.fillStyle = "white";
+            this.ctx.textAlign = "right";
+            this.ctx.fillText(this.bombCountdown, this.canvas.width - 30, 50);
+        }
 
         if (this.renderGrid && this.mapData && this.bounds) {
             this.ctx.strokeStyle = 'red';

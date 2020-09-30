@@ -4,6 +4,7 @@ import initGame from './Game';
 import GunShop from './GunShop';
 import useScript from './hooks/Script';
 import InitialModal from './InitialModal';
+import Toaster from './Toaster';
 
 const { REACT_APP_GAME_SERVER } = process.env;
 
@@ -21,6 +22,7 @@ const App = () => {
         `${REACT_APP_GAME_SERVER}/object/character.js`,
         `${REACT_APP_GAME_SERVER}/object/mob.js`,
         `${REACT_APP_GAME_SERVER}/object/coin.js`,
+        `${REACT_APP_GAME_SERVER}/object/heal.js`,
         `${REACT_APP_GAME_SERVER}/index.js`,
     ]);
     const [game, setGame] = useState();
@@ -38,6 +40,7 @@ const App = () => {
         <Canvas game={game} />
         <GunShop game={game} socket={socket} />
         <InitialModal game={game} socket={socket} />
+        <Toaster/>
     </> : <div></div>;
 };
 

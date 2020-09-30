@@ -18,6 +18,9 @@ class Mob extends Character {
             noTargetCounter: 0,
             ...initInfo,
         });
+
+        this.controls[Math.random() < 0.5 ? 1 : 3] = true;
+        this.controls[0] = true;
     }
 
     setInfo(info) {
@@ -63,7 +66,7 @@ class Mob extends Character {
         let target = false;
         let targetDis = false;
         for (const obj of this.game.objects) {
-            if (obj.classType === CLASS_CHARACTER) {
+            if (obj.classType === CLASS_CHARACTER && obj.health > 0) {
                 const dis = Math.pow(this.x - obj.x, 2) + Math.pow(this.y - obj.y, 2);
                 if (dis < this.targetRange * this.targetRange) {
                     if (!target || (target && targetDis > dis)) {
@@ -73,6 +76,8 @@ class Mob extends Character {
                     if (collision(this, obj)) {
                         obj.hit();
                         obj.health -= deltaTime / 2;
+                        if (this.game.saveEvents && obj.health <= 0)
+                            this.game.events.push({ diedObj: obj });
                     }
                 }
             }
@@ -92,9 +97,8 @@ class Mob extends Character {
         super.update(deltaTime);
         if (target) this.controls[4] = (this.controls[1] || this.controls[3]) && !this.xMovement;
         else {
-            this.controls = [];
             this.noTargetCounter += deltaTime;
-            if (this.noTargetCounter >= 30) this.removed = true;
+            if (this.noTargetCounter >= 10) this.removed = true;
         }
     }
 

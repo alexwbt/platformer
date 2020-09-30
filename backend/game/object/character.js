@@ -3,8 +3,10 @@ try {
     Weapon = require('../weapon');
     collision = require("../collision").collision;
     SHAPE_LINE = require("../collision").SHAPE_LINE;
+    CLASS_CHARACTER = require("../classes").CLASS_CHARACTER;
     CLASS_SPARKS = require("../classes").CLASS_SPARKS;
     CLASS_COIN = require("../classes").CLASS_COIN;
+    CLASS_HEAL = require("../classes").CLASS_HEAL;
 } catch (err) { }
 
 class Character extends GameObject {
@@ -28,6 +30,9 @@ class Character extends GameObject {
             heals: 0,
             healTimer: 0,
             healTime: 1,
+
+            // game
+            hasBomb: false,
 
             // weapon
             aimDir: 0,
@@ -54,6 +59,9 @@ class Character extends GameObject {
         this.healTimer = info.healTimer;
         this.healTime = info.healTime;
 
+        // game
+        this.hasBomb = info.hasBomb;
+
         // weapon
         this.aimDir = info.aimDir;
         this.weaponType = info.weaponType;
@@ -78,6 +86,9 @@ class Character extends GameObject {
         this.heals = data[i++];
         this.healTimer = data[i++];
         this.healTime = data[i++];
+
+        // game
+        this.hasBomb = data[i++];
 
         // weapon
         this.aimDir = data[i++];
@@ -108,6 +119,9 @@ class Character extends GameObject {
             this.healTimer,
             this.healTime,
 
+            // game
+            this.hasBomb,
+
             // weapon
             this.aimDir,
             this.weaponType,
@@ -120,6 +134,8 @@ class Character extends GameObject {
         if (bullet) {
             this.angle = 0.3 * bullet.xVelocity / Math.abs(bullet.xVelocity);
             this.health = Math.max(0, this.health - bullet.damage);
+            if (this.game.saveEvents && this.health <= 0)
+                this.game.events.push({ diedObj: this, bullet });
             for (const pt of coll)
                 if (pt) this.game.spawnParticle(CLASS_SPARKS, { x: pt.x, y: pt.y, colorFunction: 2, amount: 30 });
         } else this.game.spawnParticle(CLASS_SPARKS, { ...this.getCenter(), colorFunction: 2, amount: 30 });
@@ -129,6 +145,39 @@ class Character extends GameObject {
         if (this.coins > 10) {
             this.coins -= 10;
             this.heals++;
+        }
+    }
+
+    dropItems() {
+        const items = [
+            { amount: this.coins, classType: CLASS_COIN },
+            { amount: this.heals, classType: CLASS_HEAL },
+        ];
+
+        for (const item of items) {
+            let divide = 1;
+            for (let i = 100; true; i *= 10)
+                if (item.amount >= i) divide *= 10;
+                else break;
+            for (let i = 0; i < Math.floor(item.amount / divide); i++) {
+                this.game.spawnObject(item.classType, {
+                    x: this.x,
+                    y: this.y,
+                    xVelocity: (Math.random() - 0.5) * 2,
+                    yVelocity: Math.random() - 0.5,
+                    amount: divide
+                });
+            }
+            const left = item.amount % divide;
+            if (left >= 1) {
+                this.game.spawnObject(item.classType, {
+                    x: this.x,
+                    y: this.y,
+                    xVelocity: (Math.random() - 0.5) * 2,
+                    yVelocity: Math.random() - 0.5,
+                    amount: left
+                });
+            }
         }
     }
 
@@ -143,7 +192,6 @@ class Character extends GameObject {
         else if (!this.onGround) this.jumpHold = -1;
 
         if ((this.controls[0] || this.controls[4]) && !this.controls[5] && this.jumpHold > 0 && this.jumpHold <= this.jump)
-            // this.yVelocity = -4 * Math.sin((this.jumpHold / this.jump) * Math.PI / 2); // ease out sign
             this.yVelocity = -4 * (1 - Math.pow(1 - (this.jumpHold / this.jump), 3)); // ease out cubic
 
         // walk
@@ -185,18 +233,35 @@ class Character extends GameObject {
 
         if (this.health <= 0) {
             this.removed = true;
-            for (let i = 0; i < this.coins; i++) {
-                this.game.spawnObject(CLASS_COIN, {
-                    x: this.x,
-                    y: this.y,
-                    xVelocity: (Math.random() - 0.5) * 2,
-                    yVelocity: Math.random() - 0.5
-                });
-            }
+            this.dropItems();
         }
 
         super.update();
         this.yVelocity += 0.3;
+
+        
+        if (this.game.saveEvents && this.classType === CLASS_CHARACTER && this.game.deadline && this.y > this.game.deadline) {
+            this.game.events.push({ diedObj: this, fell: true });
+        }
+
+        if (this.hasBomb) {
+            this.game.spawnParticle(CLASS_SPARKS, {
+                x: this.x + this.width - 1,
+                y: this.y - this.height * 2,
+                radius: 5,
+                colorFunction: 1
+            });
+        }
+
+        if (this.explode) {
+            this.game.spawnParticle(CLASS_SPARKS, {
+                x: this.x + this.width / 2,
+                y: this.y - this.height,
+                radius: 30,
+                amount: 300,
+                colorFunction: 1
+            });
+        }
 
         if (this.weaponType >= 0)
             this.weapon.update(deltaTime);
@@ -225,7 +290,7 @@ class Character extends GameObject {
             yOffset = Math.pow(Math.sin(this.movedTime * 2 * 2 * Math.PI), 2) / 2;
         }
         if (this.lookingLeft) this.game.ctx.scale(-1, 1);
-        this.renderSprite(this.game.sprites[1], spriteX, spriteY, spriteSize - 0.2, spriteSize - 0.2, -height / 2, -height - yOffset * 10, height, height);
+        this.game.ctx.drawImage(this.game.sprites[1], spriteX, spriteY, spriteSize - 0.2, spriteSize - 0.2, -height / 2, -height - yOffset * 10, height, height);
         this.game.ctx.restore();
 
         if (this.weaponType >= 0)
@@ -255,6 +320,12 @@ class Character extends GameObject {
             this.game.ctx.fill();
         }
 
+        if (this.hasBomb) {
+            const bombWidth = 10 * this.game.scale;
+            const bombHeight = 12.5 * this.game.scale
+            this.game.ctx.drawImage(this.game.sprites[6], 0, 0, 15, 19, x + (width - bombWidth) / 2, y - height * 2, bombWidth, bombHeight);
+        }
+
         if (this.game.renderHitBox)
             this.renderHitBox();
     }
@@ -264,10 +335,10 @@ class Character extends GameObject {
         this.game.ctx.fillStyle = "white";
         this.game.ctx.textAlign = "left";
 
-        this.renderSprite(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
+        this.game.ctx.drawImage(this.game.sprites[4], 0, 0, 16, 16, 20, 20, 32, 32);
         this.game.ctx.fillText(this.coins, 65, 45);
 
-        this.renderSprite(this.game.sprites[5], 0, 0, 11, 11, 20, 60, 32, 32);
+        this.game.ctx.drawImage(this.game.sprites[5], 0, 0, 11, 11, 20, 60, 32, 32);
         this.game.ctx.fillText(this.heals, 65, 85);
     }
 

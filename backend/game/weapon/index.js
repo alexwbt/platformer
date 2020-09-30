@@ -214,7 +214,7 @@ class Weapon {
         for (let i = 0; i < info.projectile; i++) {
             const randDir = Math.PI / (100 * info.accuracy);
             const bulletDir = this.owner.aimDir + Math.random() * randDir - randDir / 2;
-            this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, ...info });
+            this.owner.game.spawnObject(CLASS_BULLET, { x, y, dir: bulletDir, ownerId: this.owner.objectId, ...info });
             this.owner.game.spawnParticle(CLASS_SPARKS, { x, y, dir: this.owner.aimDir, randomRange: Math.PI / 4, radius: 10, colorFunction: 1 });
         }
 

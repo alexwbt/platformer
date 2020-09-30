@@ -4,12 +4,12 @@ try {
     collision = require("../collision").collision;
 } catch (err) { }
 
-class Coin extends GameObject {
+class Heal extends GameObject {
 
     constructor(game, initInfo) {
         super(game, {
-            width: 2,
-            height: 2,
+            width: 5,
+            height: 5,
 
             despawnTime: 60,
             amount: 1,
@@ -42,7 +42,7 @@ class Coin extends GameObject {
             if (obj.classType === CLASS_CHARACTER) {
                 if (collision(obj, this)) {
                     this.removed = true;
-                    obj.coins += this.amount;
+                    obj.heals += this.amount;
                 } else {
                     const objCenter = obj.getCenter();
                     const center = this.getCenter();
@@ -64,19 +64,11 @@ class Coin extends GameObject {
     render() {
         const { x, y, width, height, onScreen } = this.game.onScreen(this);
         if (!onScreen) return;
-        this.game.ctx.fillStyle = 'gold';
-        this.game.ctx.beginPath();
-        this.game.ctx.arc(x + width / 2, y + height / 2, width / 2, 0, 2 * Math.PI);
-        this.game.ctx.fill();
-        this.game.ctx.strokeStyle = 'orange';
-        this.game.ctx.lineWidth = 0.5 * this.game.scale;
-        this.game.ctx.stroke();
-        // this.game.ctx.fillStyle = 'orange';
-        // this.game.ctx.fillRect(this.x + this.width / 4, this.y + this.height / 4, this.width / 2, this.height / 2);
+        this.game.ctx.drawImage(this.game.sprites[5], 0, 0, 11, 11, x, y, width, height);
     }
 
 }
 
 try {
-    module.exports = Coin;
+    module.exports = Heal;
 } catch (err) { }

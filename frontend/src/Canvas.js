@@ -23,6 +23,7 @@ const Canvas = ({ game }) => {
                 `${REACT_APP_GAME_SERVER}/resource/ammo-icon.png`,
                 `${REACT_APP_GAME_SERVER}/resource/coin-icon.png`,
                 `${REACT_APP_GAME_SERVER}/resource/heal-icon.png`,
+                `${REACT_APP_GAME_SERVER}/resource/bomb.png`,
             ]);
         }
     }, [canvas, game]);

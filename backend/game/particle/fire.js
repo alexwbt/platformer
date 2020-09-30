@@ -46,7 +46,7 @@ class Fire extends Particle {
         const index = Math.floor((this.passTime * 12) % 4);
         const spriteX = (index + 4.1) * 8;
         const spriteY = (this.fireType * 8) + 0.1;
-        super.renderSprite(this.game.sprites[0], spriteX, spriteY, 7.8, 7.8, x, y, width, height);
+        this.game.ctx.drawImage(this.game.sprites[0], spriteX, spriteY, 7.8, 7.8, x, y, width, height);
     }
 
 }

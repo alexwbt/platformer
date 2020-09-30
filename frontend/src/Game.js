@@ -1,4 +1,5 @@
 import io from 'socket.io-client';
+import { addToast } from './hooks/Toasts';
 
 const initGame = () => {
     const game = new window.Game();
@@ -24,6 +25,19 @@ const initGame = () => {
         if (!player && playerId) {
             player = game.objects.find(o => o.objectId === playerId);
         }
+    });
+
+    socket.on('game-alert', message => {
+        addToast({ message });
+    });
+
+    socket.on('bomb-countdown', countdown => {
+        game.bombCountdown = countdown;
+    });
+
+    socket.on('disconnect', () => {
+        console.log('reload');
+        window.location.reload();
     });
 
     let startTime = Date.now();
