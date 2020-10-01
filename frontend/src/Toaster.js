@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import styled, { keyframes } from 'styled-components';
-import useToaster from './hooks/Toasts';
 
 const Container = styled.div`
     position: fixed;
@@ -37,8 +36,31 @@ const ToastMessage = styled.div`
     color: ${props => props.textColor};
 `;
 
-const Toaster = () => {
-    const toasts = useToaster();
+const defaultToast = {
+    message: '',
+    color: '#444',
+    textColor: 'white',
+    fontWeight: 'normal',
+    duration: 5000
+};
+
+const Toaster = ({ socket }) => {
+    const [toasts, setToasts] = useState([]);
+
+    useEffect(() => {
+        socket.on('game-alert', message => {
+            setToasts(toasts => {
+                const safeToast = {
+                    ...defaultToast,
+                    message
+                };
+                setTimeout(() => {
+                    setToasts(toasts => toasts.filter(t => t !== safeToast));
+                }, safeToast.duration);
+                return toasts.concat(safeToast);
+            });
+        });
+    }, [socket]);
 
     return <Container>
         {

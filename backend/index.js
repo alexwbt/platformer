@@ -83,16 +83,14 @@ setInterval(() => {
             bombClient.player.hasBomb = true;
             io.emit('game-alert', `Game started. ${bombClient.player.name} has the bomb!`);
         }
-        else io.emit('bomb-countdown', 'Game has not started yet.');
+        if (clients.length < 3) io.emit('bomb-countdown', `Waiting for players to join. (${clients.length}/3)`);
+        else if (bombCountdown !== 300) io.emit('bomb-countdown', `Game is starting very soon.`);
     } else {
         bombCountdown--;
         io.emit('bomb-countdown', `The bomb is exploding in ${bombCountdown} seconds!`);
 
         if (bombCountdown <= 0 || clients.length <= 1) {
             gameStarted = false;
-            setTimeout(() => {
-                bombCountdown = 300;
-            }, 5000);
             for (const client of clients) {
                 if (client.player.hasBomb) {
                     client.player.hasBomb = false;
@@ -103,11 +101,15 @@ setInterval(() => {
                     io.emit('game-alert', `Game ended! ${client.player.name} is the winner!`);
                 }
             }
+            setTimeout(() => {
+                bombCountdown = 300;
+            }, 10000);
         }
     }
 }, 1000);
 
 const randomBomber = () => {
+    if (clients.length <= 0) return;
     const filteredClients = clients.filter(c => !c.player.removed);
 
     const bombClient = filteredClients.length > 0 && false
@@ -129,8 +131,9 @@ let bombCountdown = 300;
 const clients = [];
 const addresses = [];
 io.on('connection', socket => {
-    // if (addresses.find(address => address === socket.handshake.address))
-    //     return;
+    if (addresses.find(address => address === socket.handshake.address)) {
+        return;
+    }
     addresses.push(socket.handshake.address);
 
     const client = {

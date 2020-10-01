@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import Alert from './Alert';
 import Canvas from './Canvas';
 import initGame from './Game';
 import GunShop from './GunShop';
@@ -40,7 +41,8 @@ const App = () => {
         <Canvas game={game} />
         <GunShop game={game} socket={socket} />
         <InitialModal game={game} socket={socket} />
-        <Toaster/>
+        <Alert socket={socket} />
+        <Toaster socket={socket} />
     </> : <div></div>;
 };
 

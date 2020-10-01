@@ -104,7 +104,7 @@ class Bullet extends GameObject {
         const one = this.game.onScreen({ x: this.x1, y: this.y1 });
         const two = this.game.onScreen({ x: this.x2, y: this.y2 });
         const size = 0.8 * this.game.scale;
-        this.game.ctx.strokeStyle = 'rgba(100, 100, 100, 0.5)';
+        this.game.ctx.strokeStyle = 'rgba(150, 150, 150, 0.4)';
         this.game.ctx.lineWidth = size;
         this.game.ctx.beginPath();
         this.game.ctx.moveTo(one.x, one.y);
